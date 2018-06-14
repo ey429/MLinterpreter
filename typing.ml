@@ -1,6 +1,6 @@
-open Syntax;
+(*open Syntax
 
-exception Error of String
+exception Error of string
 
 let err s = raise (Error s)
 
@@ -83,3 +83,5 @@ let ty_decl tyenv = function
 	 		let newenv = Environment.extend id v env in
 	 			dummyenv := newenv;
 	 			(id, newenv, v)*)
+	 			
+*)

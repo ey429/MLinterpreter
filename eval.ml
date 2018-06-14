@@ -62,9 +62,9 @@ let rec eval_exp env = function
 					| [] -> env			
 			in
 				eval_exp (extend_env env env decls) exp
-	| LetRecExp (id, para, exp1, exp2) ->
+	| LetRecExp (id, paras, exp1, exp2) ->
 	 		let dummyenv = ref Environment.empty in
-	 		let newenv = Environment.extend id (ProcV (para, exp1, dummyenv)) env in
+	 		let newenv = Environment.extend id (ProcV (paras, exp1, dummyenv)) env in
 	 			dummyenv := newenv;
 	 			eval_exp newenv exp2
 	| FunExp (ids, exp) -> ProcV (ids, exp, ref env)
@@ -80,7 +80,9 @@ let rec eval_exp env = function
 												extend_env first_env newenv (List.tl ids) tl 
 									| [] -> env	
 							in
-								eval_exp (extend_env !env' !env' ids exps) body
+								let newenv = extend_env !env' !env' ids exps in
+									env' := newenv;
+									eval_exp newenv body
 					| _ -> err ("Non-function value is applied"))
 			
 
@@ -88,9 +90,9 @@ let eval_decl env = function
     Exp e -> let v = eval_exp env e in ("_", env, v)
   | Decl (id, e) ->
   		let v = eval_exp env e in (id, Environment.extend id v env, v)
-  | RecDecl (id, para, e) -> 
+  | RecDecl (id, paras, e) -> 
   	 	let dummyenv = ref Environment.empty in
-  	 	let v = (ProcV (para, e, dummyenv)) in
+  	 	let v = (ProcV (paras, e, dummyenv)) in
 	 		let newenv = Environment.extend id v env in
 	 			dummyenv := newenv;
 	 			(id, newenv, v)

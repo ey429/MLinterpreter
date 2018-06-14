@@ -25,7 +25,7 @@ type program =
   | Decl of id * exp
   | RecDecl of id * (id list) * exp
   
-
+(*
 type tyvar = int
 
 type ty = TyInt | TyBool | TyVar of tyvar | TyFun of ty * ty
@@ -68,4 +68,4 @@ let rec unify = function
 		| ty, Tyvar tyvar -> (tyvar, ty) :: unify (map (replace tyvar ty) tl)
 		| err Error("Typing Error")
 	|	[] -> MySet.empty
-
+*)
