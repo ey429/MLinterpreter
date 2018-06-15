@@ -1,31 +1,43 @@
 open Syntax
 open Eval
-open Typing
+open Util
 
-let rec read_eval_print env tyenv =
+let rec read_eval_print env =
   print_string "# ";
   flush stdout;
-  let decl = Parser.toplevel Lexer.main (Lexing.from_channel stdin) in
-	try let (newtyenv, ty) = ty_decl tyenv decl in
-  try let (id, newenv, v) = eval_decl env decl in
-    Printf.printf "val %s : " id;
-    pp_ty ty;
-    print_string " = ";
-    pp_val v;
-    print_newline();
-    read_eval_print newenv newtyenv
-  with Error s ->
-  	print_string ("Fatal Error -> " ^ s);
-  	print_newline();
-  	read_eval_print env tyenv
-  with Error s ->
-  	print_string ("Fatal Error -> " ^ s);
-  	print_newline();
-  	read_eval_print env tyenv
+ 	try let decl = Parser.toplevel Lexer.main (Lexing.from_channel stdin) in
+		try let (eqs, newenv) = eval_decl env decl in
+			let rec print_eqs eqs = 
+				match eqs with
+						(id, v) :: tl ->
+							if not (exists_var id tl) then
+								(Printf.printf "val %s = " id;
+								pp_val v;
+								print_newline());
+							print_eqs tl
+					| [] -> read_eval_print newenv
+			in print_eqs eqs
+		with Error s ->
+			print_string ("Fatal Error -> " ^ s);
+			print_newline();
+			read_eval_print env
+	with 
+		Parser.Error ->
+			print_string ("Fatal Error -> Parser Error");
+			print_newline();
+			read_eval_print env
+	|	Failure s ->
+			print_string ("Fatal Error -> " ^ s);
+			print_newline();
+			read_eval_print env		
 
-let initial_env = Environment.empty
+let initial_env =
+	Environment.extend "i" (IntV 1)
+		(Environment.extend "ii" (IntV 2)
+			(Environment.extend "iii" (IntV 3)
+				(Environment.extend "iv" (IntV 4)
+					(Environment.extend "v" (IntV 5)
+						(Environment.extend "x" (IntV 10) Environment.empty)))))
 
-let initial_tyenv = Environment.empty
-
-let _ = read_eval_print initial_env initial_tyenv
+let _ = read_eval_print initial_env
 

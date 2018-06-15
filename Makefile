@@ -5,7 +5,7 @@
 # Type 'make dc' for code with debugging information.
 # For more detail, see http://mmottl.github.io/ocaml-makefile/
 
-SOURCES=mySet.mli mySet.ml syntax.ml parser.mly lexer.mll environment.mli environment.ml eval.ml typing.ml main.ml
+SOURCES=util.ml mySet.mli mySet.ml syntax.ml parser.mly lexer.mll environment.mli environment.ml eval.ml typing.ml main.ml
 RESULT=miniml
 YFLAGS=-v
 OCAMLYACC=menhir

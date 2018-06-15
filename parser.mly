@@ -3,11 +3,13 @@ open Syntax
 %}
 
 %token LPAREN RPAREN SEMISEMI
-%token PLUS MULT LT GT AAND OOR
+%token PLUS MINUS MULT LT GT AAND OOR
 %token IF THEN ELSE TRUE FALSE
 %token LET IN EQ AND
-%token FUN RARROW
+%token FUN DFUN RARROW
 %token REC
+%token LSQPAREN RSQPAREN SEMI CONS
+%token MATCH WITH VERT
 
 %token <int> INTV
 %token <Syntax.id> ID
@@ -18,17 +20,25 @@ open Syntax
 
 toplevel :
     e=Expr SEMISEMI { Exp e }
-  | LET x=ID EQ e=Expr SEMISEMI { Decl (x, e) }
+  | m=MulLET SEMISEMI { Decl m }
   | LET REC x=ID EQ FUN m=MulID RARROW e=Expr SEMISEMI { RecDecl (x, m, e) }
+  | LET REC x=ID m=MulID EQ e=Expr SEMISEMI { RecDecl (x, m, e) }
+
+MulLET :
+  | LET d=DeclExpr m=MulLET { d :: m }
+	| LET d=DeclExpr { [d] }
 
 Expr :
     e=IfExpr { e }
   | e=ORExpr { e }
   | e=LetExpr { e }
   | e=FunExpr { e }
+  | e=ConsExpr { e }
+  | e=MatchExpr { e }
   
 FunExpr :
-	FUN m=MulID RARROW e=Expr { FunExp (m, e) }
+		FUN m=MulID RARROW e=Expr { FunExp (m, e) }
+	| DFUN m=MulID RARROW e=Expr { DFunExp (m, e) }
 	
 MulID :
 		x=ID m=MulID { x :: m }
@@ -37,10 +47,21 @@ MulID :
 LetExpr :
 		LET d=DeclExpr IN e=Expr { LetExp (d, e) }
 	| LET REC x=ID EQ FUN m=MulID RARROW e1=Expr IN e2=Expr { LetRecExp (x, m, e1, e2) }
+	| LET REC x=ID m=MulID EQ e1=Expr IN e2=Expr { LetRecExp (x, m, e1, e2) }
 
 DeclExpr :
-		x=ID EQ e=Expr AND d=DeclExpr { (x, e) :: d }
-	| x=ID EQ e=Expr { [(x, e)] }
+		u=UnitDeclExpr AND d=DeclExpr { u :: d }
+	| u=UnitDeclExpr { [u] }
+	
+UnitDeclExpr :
+		x=ID EQ e=Expr { (x, e) }
+	| f=ID p=MulID EQ e=Expr { (f, FunExp (p, e)) }
+	
+ConsExpr :
+	e1=Expr CONS e2=Expr { ConsExp (e1, e2) }
+	
+MatchExpr :
+	MATCH e1=Expr WITH LSQPAREN RSQPAREN RARROW e2=Expr VERT x1=ID CONS x2=ID RARROW e3=Expr { MatchExp (e1, e2, e3, x1, x2) } 
 
 ORExpr :
 		l=ORExpr OOR r=ANDExpr { BinOp (Or, l, r) }
@@ -48,6 +69,10 @@ ORExpr :
 
 ANDExpr :
 		l=ANDExpr AAND r=LTExpr { BinOp (And, l, r) }
+	| e=EQExpr { e }
+
+EQExpr : 
+		l=PExpr EQ r=PExpr { BinOp (Eq, l, r) }
 	| e=LTExpr { e }
 
 LTExpr : 
@@ -60,6 +85,7 @@ GTExpr :
 
 PExpr :
     l=PExpr PLUS r=MExpr { BinOp (Plus, l, r) }
+  | l=PExpr MINUS r=MExpr { BinOp (Minus, l, r) }
   | e=MExpr { e }
 
 MExpr : 
@@ -67,19 +93,22 @@ MExpr :
   | e=AppExpr { e }
 
 AppExpr :
-		e=AppExpr m=MulExpr { AppExp (e, m) }
+		e=AppExpr x=AExpr { AppExp (e, x) }
 	| e=AExpr { e }
 
-MulExpr :
-		e=AExpr m=MulExpr { e :: m }
-	| e=AExpr { [e] }
- 
 AExpr :
     i=INTV { ILit i }
   | TRUE   { BLit true }
   | FALSE  { BLit false }
   | i=ID   { Var i }
   | LPAREN e=Expr RPAREN { e }
+  | LSQPAREN e=ListExpr RSQPAREN { ListExp e }
+  
+ListExpr :
+		e=Expr SEMI l=ListExpr { e :: l }
+	|	e=Expr SEMI { [e] }
+	| e=Expr { [e] }
+	| { [] }
 
 IfExpr :
     IF c=Expr THEN t=Expr ELSE e=Expr { IfExp (c, t, e) }

@@ -1,12 +1,13 @@
 (* ML interpreter / type reconstruction *)
 type id = string
 
-type binOp = Plus | Mult | Lt | Gt | And | Or
+type binOp = Plus | Minus | Mult | Eq | Lt | Gt | And | Or
 
 type exp =
   | Var of id (* Var "x" --> x *)
   | ILit of int (* ILit 3 --> 3 *)
   | BLit of bool (* BLit true --> true *)
+  | EmptyList
   | BinOp of binOp * exp * exp
   (* BinOp(Plus, ILit 4, Var "x") --> 4 + x *)
   | IfExp of exp * exp * exp
@@ -16,16 +17,20 @@ type exp =
      if x<4 then 3 else x *)
   | LetExp of ((id * exp) list) * exp
   | FunExp of (id list) * exp
-  | AppExp of exp * (exp list)
+  | DFunExp of (id list) * exp
+  | ConsExp of exp * exp
+  | MatchExp of exp * exp * exp * id * id
+  | ListExp of exp list
+  | AppExp of exp * exp
   | LetRecExp of id * (id list) * exp * exp
 
 
 type program = 
     Exp of exp
-  | Decl of id * exp
+  | Decl of ((id * exp) list) list
   | RecDecl of id * (id list) * exp
   
-
+(*
 type tyvar = int
 
 type ty = TyInt | TyBool | TyVar of tyvar | TyFun of ty * ty
@@ -68,4 +73,4 @@ let rec unify = function
 		| ty, Tyvar tyvar -> (tyvar, ty) :: unify (map (replace tyvar ty) tl)
 		| err Error("Typing Error")
 	|	[] -> MySet.empty
-
+*)
