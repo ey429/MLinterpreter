@@ -3,11 +3,13 @@ open Syntax
 %}
 
 %token LPAREN RPAREN SEMISEMI
-%token PLUS MULT LT GT AAND OOR
+%token PLUS MINUS MULT LT GT AAND OOR
 %token IF THEN ELSE TRUE FALSE
 %token LET IN EQ AND
-%token FUN RARROW
+%token FUN DFUN RARROW
 %token REC
+%token LSQPAREN RSQPAREN SEMI CONS
+%token MATCH WITH VERT
 
 %token <int> INTV
 %token <Syntax.id> ID
@@ -31,9 +33,12 @@ Expr :
   | e=ORExpr { e }
   | e=LetExpr { e }
   | e=FunExpr { e }
+  | e=ConsExpr { e }
+  | e=MatchExpr { e }
   
 FunExpr :
-	FUN m=MulID RARROW e=Expr { FunExp (m, e) }
+		FUN m=MulID RARROW e=Expr { FunExp (m, e) }
+	| DFUN m=MulID RARROW e=Expr { DFunExp (m, e) }
 	
 MulID :
 		x=ID m=MulID { x :: m }
@@ -52,12 +57,22 @@ UnitDeclExpr :
 		x=ID EQ e=Expr { (x, e) }
 	| f=ID p=MulID EQ e=Expr { (f, FunExp (p, e)) }
 	
+ConsExpr :
+	e1=Expr CONS e2=Expr { ConsExp (e1, e2) }
+	
+MatchExpr :
+	MATCH e1=Expr WITH LSQPAREN RSQPAREN RARROW e2=Expr VERT x1=ID CONS x2=ID RARROW e3=Expr { MatchExp (e1, e2, e3, x1, x2) } 
+
 ORExpr :
 		l=ORExpr OOR r=ANDExpr { BinOp (Or, l, r) }
 	| e=ANDExpr { e }
 
 ANDExpr :
 		l=ANDExpr AAND r=LTExpr { BinOp (And, l, r) }
+	| e=EQExpr { e }
+
+EQExpr : 
+		l=PExpr EQ r=PExpr { BinOp (Eq, l, r) }
 	| e=LTExpr { e }
 
 LTExpr : 
@@ -70,6 +85,7 @@ GTExpr :
 
 PExpr :
     l=PExpr PLUS r=MExpr { BinOp (Plus, l, r) }
+  | l=PExpr MINUS r=MExpr { BinOp (Minus, l, r) }
   | e=MExpr { e }
 
 MExpr : 
@@ -86,6 +102,13 @@ AExpr :
   | FALSE  { BLit false }
   | i=ID   { Var i }
   | LPAREN e=Expr RPAREN { e }
+  | LSQPAREN e=ListExpr RSQPAREN { ListExp e }
+  
+ListExpr :
+		e=Expr SEMI l=ListExpr { e :: l }
+	|	e=Expr SEMI { [e] }
+	| e=Expr { [e] }
+	| { [] }
 
 IfExpr :
     IF c=Expr THEN t=Expr ELSE e=Expr { IfExp (c, t, e) }

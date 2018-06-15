@@ -10,6 +10,8 @@ type exval =
   | IntV of int
   | BoolV of bool
   | ProcV of id * exp * dnval Environment.t ref
+  | DProcV of id * exp
+  | ListV of dnval list
 and dnval = exval
 
 exception Error of string
@@ -21,14 +23,24 @@ let rec string_of_exval = function
     IntV i -> string_of_int i
   | BoolV b -> string_of_bool b
   | ProcV (id, exp, env) -> "<fun>"
-
+  | DProcV (id, exp) -> "<dfun>"
+  | ListV lst ->
+			let rec string_of_list = function
+					hd :: md :: tl -> (string_of_exval hd) ^ "; " ^ (string_of_list (md :: tl))
+				| [x] -> string_of_exval x
+				| [] -> ""
+			in "[" ^ (string_of_list lst) ^ "]"
+			
 let pp_val v = print_string (string_of_exval v)
 
 let apply_prim op arg1 arg2 = match op, arg1, arg2 with
     Plus, IntV i1, IntV i2 -> IntV (i1 + i2)
   | Plus, _, _ -> err ("Both arguments must be integer: +")
+  | Minus, IntV i1, IntV i2 -> IntV (i1 - i2)
+  | Minus, _, _ -> err ("Both arguments must be integer: -")
   | Mult, IntV i1, IntV i2 -> IntV (i1 * i2)
   | Mult, _, _ -> err ("Both arguments must be integer: *")
+  | Eq, e1, e2 -> BoolV (e1 = e2)
   | Lt, IntV i1, IntV i2 -> BoolV (i1 < i2)
   | Lt, _, _ -> err ("Both arguments must be integer: <")
   | Gt, IntV i1, IntV i2 -> BoolV (i1 > i2)
@@ -44,6 +56,7 @@ let rec eval_exp env = function
         Environment.Not_bound -> err ("Variable not bound: " ^ x))
   | ILit i -> IntV i
   | BLit b -> BoolV b
+  | EmptyList -> ListV []
   | BinOp (op, exp1, exp2) -> 
       let arg1 = eval_exp env exp1 in
       let arg2 = eval_exp env exp2 in
@@ -77,6 +90,34 @@ let rec eval_exp env = function
 			(match ids with
 					id :: tl -> ProcV (id, FunExp (tl, exp), ref env)
 				| [] -> eval_exp env exp)
+	| DFunExp (ids, exp) ->
+			(match ids with
+					id :: tl -> DProcV (id, DFunExp (tl, exp))
+				| [] -> eval_exp env exp)
+	| ConsExp (exp1, exp2) ->
+			let v1 = eval_exp env exp1 in
+			let v2 = eval_exp env exp2 in
+				(match v2 with 
+						ListV lst -> ListV (v1 :: lst)
+					| _ -> err ("Cons : Second Argument must be type of list"))
+	| MatchExp (exp1, exp2, exp3, x1, x2) ->
+			if x1 = x2 then err ("Variable name is duplicated")
+			else
+				let v1 = eval_exp env exp1 in
+				let v2 = eval_exp env exp2 in
+					(match v1 with
+							ListV [] -> v2
+						| ListV (hd :: tl) -> 
+								let newenv = Environment.extend x1 hd (Environment.extend x2 (ListV tl) env) in
+									eval_exp newenv exp3
+						| _ -> err ("First Argument of expression match must be type of list"))
+	| ListExp explist -> 
+			let rec eval_explist explist =
+				(match explist with
+						exp :: tl -> (eval_exp env exp) :: (eval_explist tl) 
+					| [] -> [])
+			in
+				ListV (eval_explist explist)
 	| AppExp (exp1, exp2) ->
 			let func = eval_exp env exp1 in
 			let arg = eval_exp env exp2 in 
@@ -84,7 +125,17 @@ let rec eval_exp env = function
 						ProcV (id, body, env') ->
 							let newenv = Environment.extend id arg !env' in
 								eval_exp newenv body
+					| DProcV (id, body) ->
+							let newenv = Environment.extend id arg env in
+								eval_exp newenv body
 					| _ -> err ("Non-function value is applied"))
+
+(*							(match arg with
+									IntV i -> 
+										if i < 0 then eval_exp env (BinOp (Minus, exp1, ILit (-i)))
+										else err ("Non-function value is applied")
+								| _ -> err ("Non-function value is applied")))
+*)
 
 let eval_decl env = function
     Exp e -> let v = eval_exp env e in ([("-", v)], env)

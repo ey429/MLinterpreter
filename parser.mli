@@ -2,16 +2,23 @@
 (* The type of tokens. *)
 
 type token = 
+  | WITH
+  | VERT
   | TRUE
   | THEN
   | SEMISEMI
+  | SEMI
+  | RSQPAREN
   | RPAREN
   | REC
   | RARROW
   | PLUS
   | OOR
   | MULT
+  | MINUS
+  | MATCH
   | LT
+  | LSQPAREN
   | LPAREN
   | LET
   | INTV of (int)
@@ -23,6 +30,8 @@ type token =
   | FALSE
   | EQ
   | ELSE
+  | DFUN
+  | CONS
   | AND
   | AAND
 
