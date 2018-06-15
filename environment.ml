@@ -16,3 +16,7 @@ let rec fold_right f env a =
   match env with
       [] -> a
     | (_, v)::rest -> f v (fold_right f rest a)
+
+let rec print = function
+		(id, v) :: tl -> print_string (id ^ " "); print tl
+	| [] -> print_newline()

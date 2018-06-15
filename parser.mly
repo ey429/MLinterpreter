@@ -18,8 +18,13 @@ open Syntax
 
 toplevel :
     e=Expr SEMISEMI { Exp e }
-  | LET x=ID EQ e=Expr SEMISEMI { Decl (x, e) }
+  | m=MulLET SEMISEMI { Decl m }
   | LET REC x=ID EQ FUN m=MulID RARROW e=Expr SEMISEMI { RecDecl (x, m, e) }
+  | LET REC x=ID m=MulID EQ e=Expr SEMISEMI { RecDecl (x, m, e) }
+
+MulLET :
+  | LET d=DeclExpr m=MulLET { d :: m }
+	| LET d=DeclExpr { [d] }
 
 Expr :
     e=IfExpr { e }
@@ -37,11 +42,16 @@ MulID :
 LetExpr :
 		LET d=DeclExpr IN e=Expr { LetExp (d, e) }
 	| LET REC x=ID EQ FUN m=MulID RARROW e1=Expr IN e2=Expr { LetRecExp (x, m, e1, e2) }
+	| LET REC x=ID m=MulID EQ e1=Expr IN e2=Expr { LetRecExp (x, m, e1, e2) }
 
 DeclExpr :
-		x=ID EQ e=Expr AND d=DeclExpr { (x, e) :: d }
-	| x=ID EQ e=Expr { [(x, e)] }
-
+		u=UnitDeclExpr AND d=DeclExpr { u :: d }
+	| u=UnitDeclExpr { [u] }
+	
+UnitDeclExpr :
+		x=ID EQ e=Expr { (x, e) }
+	| f=ID p=MulID EQ e=Expr { (f, FunExp (p, e)) }
+	
 ORExpr :
 		l=ORExpr OOR r=ANDExpr { BinOp (Or, l, r) }
 	| e=ANDExpr { e }
@@ -67,13 +77,9 @@ MExpr :
   | e=AppExpr { e }
 
 AppExpr :
-		e=AppExpr m=MulExpr { AppExp (e, m) }
+		e=AppExpr x=AExpr { AppExp (e, x) }
 	| e=AExpr { e }
 
-MulExpr :
-		e=AExpr m=MulExpr { e :: m }
-	| e=AExpr { [e] }
- 
 AExpr :
     i=INTV { ILit i }
   | TRUE   { BLit true }
