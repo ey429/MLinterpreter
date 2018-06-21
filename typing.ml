@@ -21,23 +21,30 @@ let rec freevar_ty = function
 	| _ -> MySet.empty
 	
 let rec string_of_ty free = function
-		TyInt -> "int"
-	| TyBool -> "bool"
+		TyInt -> ("int", free)
+	| TyBool -> ("bool", free)
 	| TyVar i ->
-			let id = (MySet.index i free) in
+			let free' = 
+				if MySet.member i free then free
+				else MySet.insert i free
+			in
+			let id = (MySet.index i free') in
 			let num_str = if id >= 26 then string_of_int (id / 26) else "" in 
-				"'" ^ (String.make 1 (char_of_int (97 + (id mod 26))) ^ num_str)
+				("'" ^ (String.make 1 (char_of_int (97 + (id mod 26))) ^ num_str), free')
 	| TyFun (ty1, ty2) -> 
-			let s1 = string_of_ty free ty1 in
-				(match ty1 with
+			let s1, free' = string_of_ty free ty1 in
+			let s2, free'' = string_of_ty free' ty2 in 
+				((match ty1 with
 						TyFun (_, _) -> "(" ^ s1 ^ ")"
-					| _ -> s1) ^ " -> " ^ (string_of_ty free ty2)
-	| TyList ty -> (string_of_ty free ty) ^ " list" 
-	| TyNone -> "-"
+					| _ -> s1) ^ " -> " ^ s2, free'')
+	| TyList ty -> 
+			let s, free' = string_of_ty free ty in
+				(s ^ " list", free')
+	| TyNone -> ("-", free)
 
 let pp_ty ty = 
-	let free = freevar_ty ty in
-		print_string (string_of_ty free ty)
+	let s, _ = string_of_ty MySet.empty ty in
+	print_string s
 
 type subst = (tyvar * ty) list
 
@@ -152,11 +159,13 @@ let rec ty_exp tyenv = function
 					para :: p_tl -> 
 						let arg_ty = fresh_tyvar () in
 						let body_ty = fresh_tyvar () in
-						let tyenv' = Environment.extend id (tysc_of_ty (TyFun (arg_ty, body_ty))) tyenv in
-						let (s1, ty1) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') (FunExp (p_tl, exp1)) in
-						let (s2, ty2) = ty_exp tyenv' exp2 in
-						let eqs = (ty1, body_ty) :: (eqs_of_subst s1) @ (eqs_of_subst s2) in
-						let s = unify eqs in (s, subst_type s ty2)
+						let tyfun = TyFun (arg_ty, body_ty) in
+						let (s1, ty1) = ty_exp (Environment.extend id (tysc_of_ty tyfun) (Environment.extend para (tysc_of_ty arg_ty) tyenv)) (FunExp (p_tl, exp1)) in
+						let eqs = (ty1, body_ty) :: (eqs_of_subst s1) in
+						let s = unify eqs in
+						let (s2, ty2) = ty_exp (Environment.extend id (closure (subst_type s tyfun) tyenv s) tyenv) exp2 in
+						let eqs' =  (eqs_of_subst s) @ (eqs_of_subst s2) in
+						let s' = unify eqs' in (s', subst_type s' ty2)
 				| [] -> err ("Function has no argument: " ^ id))
 	| FunExp (ids, exp) -> 
 			(match ids with
@@ -214,14 +223,14 @@ let ty_decl tyenv = function
 				|	[] -> (tys, tyenv))
 			in ty_line decls ([], tyenv)
   | RecDecl (id, paras, e) ->
-			let ty = 
+			let s, ty = 
 				(match paras with 
 						para :: p_tl -> 
 							let arg_ty = fresh_tyvar () in
 							let body_ty = fresh_tyvar () in
-							let tyenv' = Environment.extend id (tysc_of_ty (TyFun (arg_ty, body_ty))) tyenv in
-							let (s1, ty1) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') (FunExp (p_tl, e)) in
+							let tyfun = TyFun (arg_ty, body_ty) in
+							let (s1, ty1) = ty_exp (Environment.extend id (tysc_of_ty tyfun) (Environment.extend para (tysc_of_ty arg_ty) tyenv)) (FunExp (p_tl, e)) in
 							let eqs = (ty1, body_ty) :: (eqs_of_subst s1) in
-							let s = unify eqs in subst_type s (TyFun (arg_ty, body_ty))
+							let s = unify eqs in (s, subst_type s tyfun)
 					| [] -> err ("Function has no argument: " ^ id))
-			in ([ty], Environment.extend id (tysc_of_ty ty) tyenv)
+			in ([ty], Environment.extend id (closure ty tyenv s) tyenv)

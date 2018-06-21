@@ -33,4 +33,4 @@ let rec bigunion = function
 
 let rec index x = function
 		[] -> 0
-	| y :: rest -> (if y < x then 1 else 0) + (index x rest)
+	| y :: rest -> if y == x then 0 else 1 + (index x rest)

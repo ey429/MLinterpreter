@@ -48,6 +48,10 @@ LetExpr :
 	| LET REC x=ID EQ FUN m=MulID RARROW e1=Expr IN e2=Expr { LetRecExp (x, m, e1, e2) }
 	| LET REC x=ID m=MulID EQ e1=Expr IN e2=Expr { LetRecExp (x, m, e1, e2) }
 
+(*RecDeclExpr :
+		f=ID p=MulID EQ e=Expr AND d=RecDeclExpr { (f, p, e) :: d }
+	|	f=ID p=MulID EQ e=Expr { (f, p, e) }*)
+
 DeclExpr :
 		u=UnitDeclExpr AND d=DeclExpr { u :: d }
 	| u=UnitDeclExpr { [u] }
