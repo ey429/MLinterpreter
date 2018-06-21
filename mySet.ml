@@ -31,3 +31,6 @@ let rec bigunion = function
     [] -> []
   | set1 :: rest -> union set1 (bigunion rest)
 
+let rec index x = function
+		[] -> 0
+	| y :: rest -> (if y < x then 1 else 0) + (index x rest)

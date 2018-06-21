@@ -30,10 +30,9 @@ MulLET :
 
 Expr :
     e=IfExpr { e }
-  | e=ORExpr { e }
+  | e=ConsExpr { e }
   | e=LetExpr { e }
   | e=FunExpr { e }
-  | e=ConsExpr { e }
   | e=MatchExpr { e }
   
 FunExpr :
@@ -57,12 +56,12 @@ UnitDeclExpr :
 		x=ID EQ e=Expr { (x, e) }
 	| f=ID p=MulID EQ e=Expr { (f, FunExp (p, e)) }
 	
-ConsExpr :
-	e1=Expr CONS e2=Expr { ConsExp (e1, e2) }
-	
 MatchExpr :
 	MATCH e1=Expr WITH LSQPAREN RSQPAREN RARROW e2=Expr VERT x1=ID CONS x2=ID RARROW e3=Expr { MatchExp (e1, e2, e3, x1, x2) } 
 
+ConsExpr :
+		l=ORExpr CONS r=ConsExpr { BinOp (Cons, l, r) }
+	| e=ORExpr { e }
 ORExpr :
 		l=ORExpr OOR r=ANDExpr { BinOp (Or, l, r) }
 	| e=ANDExpr { e }

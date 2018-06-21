@@ -35,20 +35,15 @@ let pp_val v = print_string (string_of_exval v)
 
 let apply_prim op arg1 arg2 = match op, arg1, arg2 with
     Plus, IntV i1, IntV i2 -> IntV (i1 + i2)
-  | Plus, _, _ -> err ("Both arguments must be integer: +")
   | Minus, IntV i1, IntV i2 -> IntV (i1 - i2)
-  | Minus, _, _ -> err ("Both arguments must be integer: -")
   | Mult, IntV i1, IntV i2 -> IntV (i1 * i2)
-  | Mult, _, _ -> err ("Both arguments must be integer: *")
-  | Eq, e1, e2 -> BoolV (e1 = e2)
+  | Eq, IntV i1, IntV i2 -> BoolV (i1 = i2)
   | Lt, IntV i1, IntV i2 -> BoolV (i1 < i2)
-  | Lt, _, _ -> err ("Both arguments must be integer: <")
   | Gt, IntV i1, IntV i2 -> BoolV (i1 > i2)
-  | Gt, _, _ -> err ("Both arguments must be integer: >")
   | And, BoolV b1, BoolV b2 -> BoolV (b1 && b2)
-  | And, _, _ -> err ("Both arguments must be boolean: &&")
   | Or, BoolV b1, BoolV b2 -> BoolV (b1 || b2)
-  | Or, _, _ -> err ("Both arguments must be boolean: ||")  
+  | Cons, l, ListV r -> ListV (l :: r)
+  | _ -> err ("Invalid expression: binOp")
 
 let rec eval_exp env = function
     Var x -> 
@@ -56,7 +51,6 @@ let rec eval_exp env = function
         Environment.Not_bound -> err ("Variable not bound: " ^ x))
   | ILit i -> IntV i
   | BLit b -> BoolV b
-  | EmptyList -> ListV []
   | BinOp (op, exp1, exp2) -> 
       let arg1 = eval_exp env exp1 in
       let arg2 = eval_exp env exp2 in
@@ -71,10 +65,8 @@ let rec eval_exp env = function
 			let rec extend_env first_env env decl =
 				(match decl with
 						(id, exp) :: tl -> 
-							if exists_var id tl then err ("Duplicated declaration!")
-							else
-								let v = eval_exp first_env exp in 
-									extend_env first_env (Environment.extend id v env) tl
+							let v = eval_exp first_env exp in 
+								extend_env first_env (Environment.extend id v env) tl
 					| [] -> env)	
 			in
 				eval_exp (extend_env env env decl) exp
@@ -85,7 +77,7 @@ let rec eval_exp env = function
 					 		let newenv = Environment.extend id (ProcV (para, FunExp(p_tl, exp1), dummyenv)) env in
 					 			dummyenv := newenv;
 					 			eval_exp newenv exp2
-					| [] -> err ("Function has no argument"))
+					| [] -> err ("Function has no argument: " ^ id))
 	| FunExp (ids, exp) -> 
 			(match ids with
 					id :: tl -> ProcV (id, FunExp (tl, exp), ref env)
@@ -94,14 +86,8 @@ let rec eval_exp env = function
 			(match ids with
 					id :: tl -> DProcV (id, DFunExp (tl, exp))
 				| [] -> eval_exp env exp)
-	| ConsExp (exp1, exp2) ->
-			let v1 = eval_exp env exp1 in
-			let v2 = eval_exp env exp2 in
-				(match v2 with 
-						ListV lst -> ListV (v1 :: lst)
-					| _ -> err ("Cons : Second Argument must be type of list"))
 	| MatchExp (exp1, exp2, exp3, x1, x2) ->
-			if x1 = x2 then err ("Variable name is duplicated")
+			if x1 = x2 then err ("Variable name is duplicated : match")
 			else
 				let v1 = eval_exp env exp1 in
 				let v2 = eval_exp env exp2 in
@@ -110,7 +96,7 @@ let rec eval_exp env = function
 						| ListV (hd :: tl) -> 
 								let newenv = Environment.extend x1 hd (Environment.extend x2 (ListV tl) env) in
 									eval_exp newenv exp3
-						| _ -> err ("First Argument of expression match must be type of list"))
+						| _ -> err ("First argument must be type of list : match"))
 	| ListExp explist -> 
 			let rec eval_explist explist =
 				(match explist with
@@ -128,7 +114,7 @@ let rec eval_exp env = function
 					| DProcV (id, body) ->
 							let newenv = Environment.extend id arg env in
 								eval_exp newenv body
-					| _ -> err ("Non-function value is applied"))
+					| _ -> err ("Non-Function value is applied"))
 
 (*							(match arg with
 									IntV i -> 
@@ -145,10 +131,8 @@ let eval_decl env = function
 					let rec extend_env first_env (eqs, env) decl =
 						(match decl with
 								(id, exp) :: tl ->
-									if exists_var id tl then err ("Duplicated declaration!")
-									else
-										let v = eval_exp first_env exp in 
-											extend_env first_env (eqs @ [(id, v)], (Environment.extend id v env)) tl
+									let v = eval_exp first_env exp in 
+										extend_env first_env (eqs @ [(id, v)], (Environment.extend id v env)) tl
 							| [] -> (eqs, env))	
 					in
 						eval_line tl (extend_env env (eqs, env) decl)
@@ -162,4 +146,4 @@ let eval_decl env = function
 					 		let newenv = Environment.extend id v env in
 					 			dummyenv := newenv;
 					 			([(id, v)], newenv)
-					| [] -> err ("Function has no argument"))
+					| [] -> err ("Function has no argument" ^ id))
