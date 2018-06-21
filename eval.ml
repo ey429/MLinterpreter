@@ -70,14 +70,25 @@ let rec eval_exp env = function
 					| [] -> env)	
 			in
 				eval_exp (extend_env env env decl) exp
-	| LetRecExp (id, paras, exp1, exp2) ->
-	 		let dummyenv = ref Environment.empty in
-	 			(match paras with
-	 					para :: p_tl ->
-					 		let newenv = Environment.extend id (ProcV (para, FunExp(p_tl, exp1), dummyenv)) env in
-					 			dummyenv := newenv;
-					 			eval_exp newenv exp2
-					| [] -> err ("Function has no argument: " ^ id))
+	| LetRecExp (funcs, exp) ->
+			let rec extend_env = function
+					(id, paras, e) :: f_tl ->
+				 		(match paras with
+				 				para :: p_tl -> 
+				 					let dummyenv = ref Environment.empty in
+				 					let dummyenvs, newenv = extend_env f_tl in
+				 					let v = ProcV (para, FunExp(p_tl, e), dummyenv) in
+					 					(dummyenv :: dummyenvs, Environment.extend id v newenv)
+							| [] -> err ("Function has no argument: " ^ id))
+				| [] -> ([], env)
+			in 
+			let dummyenvs, newenv = extend_env funcs in
+			let rec insert_env = function
+					dummyenv :: rest -> 
+						dummyenv := newenv;
+						insert_env rest
+				| [] -> ()
+			in insert_env dummyenvs; eval_exp newenv exp
 	| FunExp (ids, exp) -> 
 			(match ids with
 					id :: tl -> ProcV (id, FunExp (tl, exp), ref env)
@@ -138,12 +149,22 @@ let eval_decl env = function
 						eval_line tl (extend_env env (eqs, env) decl)
 				|	[] -> (eqs, env)
 			in eval_line decls ([], env)
-  | RecDecl (id, paras, e) ->
-   	 	let dummyenv = ref Environment.empty in	
-	 			(match paras with
-	 					para :: p_tl ->
-						 	let v = ProcV (para, FunExp(p_tl, e), dummyenv) in
-					 		let newenv = Environment.extend id v env in
-					 			dummyenv := newenv;
-					 			([(id, v)], newenv)
-					| [] -> err ("Function has no argument" ^ id))
+  | RecDecl funcs ->
+			let rec extend_env = function
+					(id, paras, e) :: f_tl ->
+				 		(match paras with
+				 				para :: p_tl ->
+				 					let dummyenv = ref Environment.empty in
+				 					let eqs, dummyenvs, newenv = extend_env f_tl in
+				 					let v = ProcV (para, FunExp(p_tl, e), dummyenv) in
+					 					((id, v) :: eqs, dummyenv :: dummyenvs, Environment.extend id v newenv)
+							| [] -> err ("Function has no argument: " ^ id))
+				| [] -> ([], [], env)
+			in 
+			let eqs, dummyenvs, newenv = extend_env funcs in
+			let rec insert_env = function
+					dummyenv :: rest -> 
+						dummyenv := newenv;
+						insert_env rest
+				| [] -> ()
+			in insert_env dummyenvs; (eqs, newenv)

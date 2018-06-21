@@ -154,19 +154,40 @@ let rec ty_exp tyenv = function
 				let (s1, ty) = ty_exp newenv exp in
 				let neweqs = (eqs_of_subst s1) @ eqs in
 				let s2 = unify neweqs in (s2, subst_type s2 ty)
-	| LetRecExp (id, paras, exp1, exp2) ->
-			(match paras with 
-					para :: p_tl -> 
+	| LetRecExp (funcs, exp) ->
+			let rec extend_env = function
+					(id, _, _) :: f_tl ->
 						let arg_ty = fresh_tyvar () in
 						let body_ty = fresh_tyvar () in
 						let tyfun = TyFun (arg_ty, body_ty) in
-						let (s1, ty1) = ty_exp (Environment.extend id (tysc_of_ty tyfun) (Environment.extend para (tysc_of_ty arg_ty) tyenv)) (FunExp (p_tl, exp1)) in
-						let eqs = (ty1, body_ty) :: (eqs_of_subst s1) in
-						let s = unify eqs in
-						let (s2, ty2) = ty_exp (Environment.extend id (closure (subst_type s tyfun) tyenv s) tyenv) exp2 in
-						let eqs' =  (eqs_of_subst s) @ (eqs_of_subst s2) in
-						let s' = unify eqs' in (s', subst_type s' ty2)
-				| [] -> err ("Function has no argument: " ^ id))
+						let tyfuns, tyenv' = extend_env f_tl in
+							(tyfun :: tyfuns, Environment.extend id (tysc_of_ty tyfun) tyenv')
+				| [] -> ([], tyenv)
+			in
+			let tyfuns, tyenv' = extend_env funcs in
+			let rec eval_eqs funcs tyfuns = match funcs, tyfuns with
+					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
+						let TyFun (arg_ty, body_ty) = tyfun in
+						(match paras with 
+								para :: p_tl -> 
+									let (s, ty) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') (FunExp (p_tl, e)) in
+										(ty, body_ty) :: (eqs_of_subst s) @ (eval_eqs f_tl tf_tl)
+							| [] -> err ("Function has no argument: " ^ id))
+				| [], [] -> []
+				| _, _ -> err ("Runtime error")
+			in
+			let eqs =	eval_eqs funcs tyfuns in
+			let s = unify eqs in
+			let rec extend_env_sc funcs tyfuns = match funcs, tyfuns with
+					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
+						Environment.extend id (closure (subst_type s tyfun) tyenv s) (extend_env_sc f_tl tf_tl)						
+				| [], [] -> tyenv
+				| _, _ -> err ("Runtime error")
+			in
+			let newtyenv = extend_env_sc funcs tyfuns in
+			let (s2, ty2) = ty_exp newtyenv exp in
+			let eqs' = (eqs_of_subst s2) @ (eqs_of_subst s) in
+			let s' = unify eqs' in (s', subst_type s' ty2)			
 	| FunExp (ids, exp) -> 
 			(match ids with
 					id :: tl ->
@@ -222,15 +243,36 @@ let ty_decl tyenv = function
 							ty_line tl (extend_env tyenv (tys, tyenv) decl)
 				|	[] -> (tys, tyenv))
 			in ty_line decls ([], tyenv)
-  | RecDecl (id, paras, e) ->
-			let s, ty = 
-				(match paras with 
-						para :: p_tl -> 
-							let arg_ty = fresh_tyvar () in
-							let body_ty = fresh_tyvar () in
-							let tyfun = TyFun (arg_ty, body_ty) in
-							let (s1, ty1) = ty_exp (Environment.extend id (tysc_of_ty tyfun) (Environment.extend para (tysc_of_ty arg_ty) tyenv)) (FunExp (p_tl, e)) in
-							let eqs = (ty1, body_ty) :: (eqs_of_subst s1) in
-							let s = unify eqs in (s, subst_type s tyfun)
-					| [] -> err ("Function has no argument: " ^ id))
-			in ([ty], Environment.extend id (closure ty tyenv s) tyenv)
+	| RecDecl funcs -> 			
+			let rec extend_env = function
+					(id, _, _) :: f_tl ->
+						let arg_ty = fresh_tyvar () in
+						let body_ty = fresh_tyvar () in
+						let tyfun = TyFun (arg_ty, body_ty) in
+						let tyfuns, tyenv' = extend_env f_tl in
+							(tyfun :: tyfuns, Environment.extend id (tysc_of_ty tyfun) tyenv')
+				| [] -> ([], tyenv)
+			in
+			let tyfuns, tyenv' = extend_env funcs in
+			let rec eval_eqs funcs tyfuns = match funcs, tyfuns with
+					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
+						let TyFun (arg_ty, body_ty) = tyfun in
+						(match paras with 
+								para :: p_tl -> 
+									let (s, ty) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') (FunExp (p_tl, e)) in
+										(ty, body_ty) :: (eqs_of_subst s) @ (eval_eqs f_tl tf_tl)
+							| [] -> err ("Function has no argument: " ^ id))
+				| [], [] -> []
+				| _, _ -> err ("Runtime error")
+			in
+			let eqs =	eval_eqs funcs tyfuns in
+			let s = unify eqs in
+			let rec extend_env_sc funcs tyfuns = match funcs, tyfuns with
+					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
+						let tys, newtyenv = extend_env_sc f_tl tf_tl in
+						let ty = subst_type s tyfun in
+							(ty :: tys, Environment.extend id (closure ty tyenv s) newtyenv)
+				| [], [] -> ([], tyenv)
+				| _, _ -> err ("Runtime error")
+			in
+				extend_env_sc funcs tyfuns

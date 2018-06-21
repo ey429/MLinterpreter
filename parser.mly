@@ -21,8 +21,7 @@ open Syntax
 toplevel :
     e=Expr SEMISEMI { Exp e }
   | m=MulLET SEMISEMI { Decl m }
-  | LET REC x=ID EQ FUN m=MulID RARROW e=Expr SEMISEMI { RecDecl (x, m, e) }
-  | LET REC x=ID m=MulID EQ e=Expr SEMISEMI { RecDecl (x, m, e) }
+	|	LET REC d=RecDeclExpr SEMISEMI { RecDecl d }
 
 MulLET :
   | LET d=DeclExpr m=MulLET { d :: m }
@@ -45,12 +44,15 @@ MulID :
   
 LetExpr :
 		LET d=DeclExpr IN e=Expr { LetExp (d, e) }
-	| LET REC x=ID EQ FUN m=MulID RARROW e1=Expr IN e2=Expr { LetRecExp (x, m, e1, e2) }
-	| LET REC x=ID m=MulID EQ e1=Expr IN e2=Expr { LetRecExp (x, m, e1, e2) }
+	| LET REC d=RecDeclExpr IN e=Expr { LetRecExp (d, e) }
 
-(*RecDeclExpr :
-		f=ID p=MulID EQ e=Expr AND d=RecDeclExpr { (f, p, e) :: d }
-	|	f=ID p=MulID EQ e=Expr { (f, p, e) }*)
+RecDeclExpr :
+		u=UnitRecDeclExpr AND d=RecDeclExpr { u :: d }
+	|	u=UnitRecDeclExpr { [u] }
+
+UnitRecDeclExpr :
+		f=ID p=MulID EQ e=Expr { (f, p, e) }
+	| f=ID EQ FUN p=MulID RARROW e=Expr { (f, p, e) }
 
 DeclExpr :
 		u=UnitDeclExpr AND d=DeclExpr { u :: d }

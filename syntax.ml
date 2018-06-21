@@ -15,13 +15,13 @@ type exp =
   | MatchExp of exp * exp * exp * id * id
   | ListExp of exp list
   | AppExp of exp * exp
-  | LetRecExp of id * (id list) * exp * exp
+  | LetRecExp of ((id * (id list) * exp) list) * exp
 
 
 type program = 
     Exp of exp
   | Decl of ((id * exp) list) list
-  | RecDecl of id * (id list) * exp
+  | RecDecl of (id * (id list) * exp) list
   
 
 type tyvar = int

@@ -1,5 +1,5 @@
 
-** Conflict (reduce/reduce) in state 90.
+** Conflict (reduce/reduce) in state 92.
 ** Token involved: RSQPAREN
 ** This state is reached from toplevel after reading:
 
@@ -21,13 +21,13 @@ AExpr
 LSQPAREN ListExpr RSQPAREN // lookahead token appears
          (?)
 
-** In state 90, looking ahead at RSQPAREN, reducing production
+** In state 92, looking ahead at RSQPAREN, reducing production
 ** ListExpr -> Expr SEMI 
 ** is permitted because of the following sub-derivation:
 
 Expr SEMI . 
 
-** In state 90, looking ahead at RSQPAREN, reducing production
+** In state 92, looking ahead at RSQPAREN, reducing production
 ** ListExpr -> 
 ** is permitted because of the following sub-derivation:
 
