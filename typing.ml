@@ -157,24 +157,28 @@ let rec ty_exp tyenv = function
 	| LetRecExp (funcs, exp) ->
 			let rec extend_env = function
 					(id, _, _) :: f_tl ->
-						let arg_ty = fresh_tyvar () in
-						let body_ty = fresh_tyvar () in
-						let tyfun = TyFun (arg_ty, body_ty) in
-						let tyfuns, tyenv' = extend_env f_tl in
-							(tyfun :: tyfuns, Environment.extend id (tysc_of_ty tyfun) tyenv')
+						if exists_var_letrec id f_tl then err ("Duplicated declaration in let: " ^ id)
+						else 
+							let arg_ty = fresh_tyvar () in
+							let body_ty = fresh_tyvar () in
+							let tyfun = TyFun (arg_ty, body_ty) in
+							let tyfuns, tyenv' = extend_env f_tl in
+								(tyfun :: tyfuns, Environment.extend id (tysc_of_ty tyfun) tyenv')
 				| [] -> ([], tyenv)
 			in
 			let tyfuns, tyenv' = extend_env funcs in
 			let rec eval_eqs funcs tyfuns = match funcs, tyfuns with
 					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
-						let TyFun (arg_ty, body_ty) = tyfun in
-						(match paras with 
-								para :: p_tl -> 
-									let (s, ty) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') (FunExp (p_tl, e)) in
-										(ty, body_ty) :: (eqs_of_subst s) @ (eval_eqs f_tl tf_tl)
-							| [] -> err ("Function has no argument: " ^ id))
+						(match tyfun with 
+								TyFun (arg_ty, body_ty) -> 
+									(match paras with 
+											para :: p_tl -> 
+												let (s, ty) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') (FunExp (p_tl, e)) in
+													(ty, body_ty) :: (eqs_of_subst s) @ (eval_eqs f_tl tf_tl)
+										| [] -> assert false)
+							| _ -> assert false)
 				| [], [] -> []
-				| _, _ -> err ("Runtime error")
+				| _, _ -> assert false
 			in
 			let eqs =	eval_eqs funcs tyfuns in
 			let s = unify eqs in
@@ -182,7 +186,7 @@ let rec ty_exp tyenv = function
 					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
 						Environment.extend id (closure (subst_type s tyfun) tyenv s) (extend_env_sc f_tl tf_tl)						
 				| [], [] -> tyenv
-				| _, _ -> err ("Runtime error")
+				| _, _ -> assert false
 			in
 			let newtyenv = extend_env_sc funcs tyfuns in
 			let (s2, ty2) = ty_exp newtyenv exp in
@@ -246,24 +250,28 @@ let ty_decl tyenv = function
 	| RecDecl funcs -> 			
 			let rec extend_env = function
 					(id, _, _) :: f_tl ->
-						let arg_ty = fresh_tyvar () in
-						let body_ty = fresh_tyvar () in
-						let tyfun = TyFun (arg_ty, body_ty) in
-						let tyfuns, tyenv' = extend_env f_tl in
-							(tyfun :: tyfuns, Environment.extend id (tysc_of_ty tyfun) tyenv')
+						if exists_var_letrec id f_tl then err ("Duplicated declaration in let: " ^ id)
+						else 
+							let arg_ty = fresh_tyvar () in
+							let body_ty = fresh_tyvar () in
+							let tyfun = TyFun (arg_ty, body_ty) in
+							let tyfuns, tyenv' = extend_env f_tl in
+								(tyfun :: tyfuns, Environment.extend id (tysc_of_ty tyfun) tyenv')
 				| [] -> ([], tyenv)
 			in
 			let tyfuns, tyenv' = extend_env funcs in
 			let rec eval_eqs funcs tyfuns = match funcs, tyfuns with
 					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
-						let TyFun (arg_ty, body_ty) = tyfun in
-						(match paras with 
-								para :: p_tl -> 
-									let (s, ty) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') (FunExp (p_tl, e)) in
-										(ty, body_ty) :: (eqs_of_subst s) @ (eval_eqs f_tl tf_tl)
-							| [] -> err ("Function has no argument: " ^ id))
+						(match tyfun with 
+								TyFun (arg_ty, body_ty) ->
+									(match paras with 
+											para :: p_tl -> 
+												let (s, ty) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') (FunExp (p_tl, e)) in
+													(ty, body_ty) :: (eqs_of_subst s) @ (eval_eqs f_tl tf_tl)
+										| [] -> assert false)
+							| _ -> assert false)
 				| [], [] -> []
-				| _, _ -> err ("Runtime error")
+				| _, _ -> assert false
 			in
 			let eqs =	eval_eqs funcs tyfuns in
 			let s = unify eqs in
@@ -273,6 +281,6 @@ let ty_decl tyenv = function
 						let ty = subst_type s tyfun in
 							(ty :: tys, Environment.extend id (closure ty tyenv s) newtyenv)
 				| [], [] -> ([], tyenv)
-				| _, _ -> err ("Runtime error")
+				| _, _ -> assert false
 			in
 				extend_env_sc funcs tyfuns

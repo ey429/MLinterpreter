@@ -64,7 +64,7 @@ let rec eval_exp env = function
 	| LetExp (decl, exp) ->
 			let rec extend_env first_env env decl =
 				(match decl with
-						(id, exp) :: tl -> 
+						(id, exp) :: tl ->
 							let v = eval_exp first_env exp in 
 								extend_env first_env (Environment.extend id v env) tl
 					| [] -> env)	
