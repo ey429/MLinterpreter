@@ -28,3 +28,7 @@ type tyvar = int
 
 type ty = TyInt | TyBool | TyVar of tyvar | TyFun of ty * ty | TyList of ty | TyNone
 
+type tysc = TyScheme of tyvar list * ty
+
+let tysc_of_ty ty = TyScheme ([], ty)
+

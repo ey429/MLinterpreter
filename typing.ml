@@ -5,7 +5,7 @@ exception Error of string
 
 let err s = raise (Error s)
 
-type tyenv = ty Environment.t
+type tyenv = tysc Environment.t
 
 let fresh_tyvar =
 	let counter = ref 0 in
@@ -19,7 +19,7 @@ let rec freevar_ty = function
 	| TyFun (ty1, ty2) -> MySet.union (freevar_ty ty1) (freevar_ty ty2)
 	| TyList ty -> freevar_ty ty
 	| _ -> MySet.empty
-
+	
 let rec string_of_ty free = function
 		TyInt -> "int"
 	| TyBool -> "bool"
@@ -82,6 +82,25 @@ let rec unify = function
 					| _ -> err ("Type error"))
 	|	[] -> []
 
+let rec freevar_tysc scheme =
+	let TyScheme (vars, ty) = scheme in
+		(match vars with
+				var :: tl -> MySet.remove var (freevar_tysc (TyScheme (tl, ty)))
+			| [] -> freevar_ty ty)
+		
+let freevar_tyenv tyenv = 
+	let merge_freevar tysc rest = 
+		MySet.union (freevar_tysc tysc) rest
+	in Environment.fold_right merge_freevar tyenv MySet.empty
+
+let closure ty tyenv subst = 
+	let fv_tyenv' = freevar_tyenv tyenv in
+	let fv_tyenv =
+		MySet.bigunion
+			(MySet.map (fun id -> freevar_ty (subst_type subst (TyVar id))) fv_tyenv') in
+	let ids = MySet.diff (freevar_ty ty) fv_tyenv in
+		TyScheme (MySet.to_list ids, ty)
+
 let ty_prim op ty1 ty2 = match op with
     Plus -> ([(ty1, TyInt); (ty2, TyInt)], TyInt)
   | Minus -> ([(ty1, TyInt); (ty2, TyInt)], TyInt)
@@ -95,8 +114,11 @@ let ty_prim op ty1 ty2 = match op with
 
 let rec ty_exp tyenv = function
     Var x -> 
-      (try ([], Environment.lookup x tyenv) with 
-        Environment.Not_bound -> err ("Variable not bound: " ^ x))
+      (try 
+      	let TyScheme (vars, ty) = Environment.lookup x tyenv in
+      	let s = List.map (fun id -> (id, fresh_tyvar ())) vars in 
+      		([], subst_type s ty)
+      with Environment.Not_bound -> err ("Variable not bound: " ^ x))
   | ILit _ -> ([], TyInt)
   | BLit _ -> ([], TyBool)
   | BinOp (op, exp1, exp2) -> 
@@ -118,8 +140,7 @@ let rec ty_exp tyenv = function
 							if exists_var id tl then err ("Duplicated declaration in let: " ^ id)
 							else
 								let (s, ty) = ty_exp first_env exp in
-								let alpha = fresh_tyvar () in
-									extend_env first_env ((ty, alpha) :: (eqs_of_subst s) @ eqs, (Environment.extend id alpha tyenv)) tl
+									extend_env first_env ((eqs_of_subst s) @ eqs, (Environment.extend id (closure ty first_env s) tyenv)) tl
 					| [] -> (eqs, tyenv))
 			in
 				let (eqs, newenv) = extend_env tyenv ([], tyenv) decl in
@@ -131,8 +152,8 @@ let rec ty_exp tyenv = function
 					para :: p_tl -> 
 						let arg_ty = fresh_tyvar () in
 						let body_ty = fresh_tyvar () in
-						let tyenv' = Environment.extend id (TyFun (arg_ty, body_ty)) tyenv in
-						let (s1, ty1) = ty_exp (Environment.extend para arg_ty tyenv') (FunExp (p_tl, exp1)) in
+						let tyenv' = Environment.extend id (tysc_of_ty (TyFun (arg_ty, body_ty))) tyenv in
+						let (s1, ty1) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') (FunExp (p_tl, exp1)) in
 						let (s2, ty2) = ty_exp tyenv' exp2 in
 						let eqs = (ty1, body_ty) :: (eqs_of_subst s1) @ (eqs_of_subst s2) in
 						let s = unify eqs in (s, subst_type s ty2)
@@ -141,7 +162,7 @@ let rec ty_exp tyenv = function
 			(match ids with
 					id :: tl ->
 						let arg_ty = fresh_tyvar () in
-						let (s, body_ty) = ty_exp (Environment.extend id arg_ty tyenv) (FunExp (tl, exp)) in
+						let (s, body_ty) = ty_exp (Environment.extend id (tysc_of_ty arg_ty) tyenv) (FunExp (tl, exp)) in
 							(s, TyFun (subst_type s arg_ty, body_ty))
 				| [] -> ty_exp tyenv exp)
 	| MatchExp (exp1, exp2, exp3, x1, x2) ->
@@ -149,7 +170,7 @@ let rec ty_exp tyenv = function
 			let beta = fresh_tyvar () in
 			let (s1, ty1) = ty_exp tyenv exp1 in
 			let (s2, ty2) = ty_exp tyenv exp2 in
-			let tyenv' = Environment.extend x1 alpha (Environment.extend x2 (TyList alpha) tyenv) in
+			let tyenv' = Environment.extend x1 (tysc_of_ty alpha) (Environment.extend x2 (tysc_of_ty (TyList alpha)) tyenv) in
 			let (s3, ty3) = ty_exp tyenv' exp3 in
 			let eqs = (ty1, TyList alpha) :: (ty2, beta) :: (ty3, beta) :: (eqs_of_subst s1) @ (eqs_of_subst s2) @ (eqs_of_subst s3) in
 			let s = unify eqs in (s, subst_type s beta)
@@ -186,7 +207,7 @@ let ty_decl tyenv = function
 										if exists_var id tl then err ("Duplicated declaration in let: " ^ id)
 										else
 											let (s, ty) = ty_exp first_env exp in 
-												extend_env first_env (tys @ [ty], (Environment.extend id ty tyenv)) tl
+												extend_env first_env (tys @ [ty], (Environment.extend id (closure ty first_env s) tyenv)) tl
 								| [] -> (tys, tyenv))	
 						in
 							ty_line tl (extend_env tyenv (tys, tyenv) decl)
@@ -198,9 +219,9 @@ let ty_decl tyenv = function
 						para :: p_tl -> 
 							let arg_ty = fresh_tyvar () in
 							let body_ty = fresh_tyvar () in
-							let tyenv' = Environment.extend id (TyFun (arg_ty, body_ty)) tyenv in
-							let (s1, ty1) = ty_exp (Environment.extend para arg_ty tyenv') (FunExp (p_tl, e)) in
+							let tyenv' = Environment.extend id (tysc_of_ty (TyFun (arg_ty, body_ty))) tyenv in
+							let (s1, ty1) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') (FunExp (p_tl, e)) in
 							let eqs = (ty1, body_ty) :: (eqs_of_subst s1) in
 							let s = unify eqs in subst_type s (TyFun (arg_ty, body_ty))
 					| [] -> err ("Function has no argument: " ^ id))
-			in ([ty], Environment.extend id ty tyenv)
+			in ([ty], Environment.extend id (tysc_of_ty ty) tyenv)
