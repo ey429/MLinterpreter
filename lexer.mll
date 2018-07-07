@@ -14,7 +14,11 @@ let reservedWords = [
   ("rec", Parser.REC);
   ("match", Parser.MATCH);
   ("with", Parser.WITH);
-] 
+  ("type", Parser.TYPE);
+  ("int", Parser.INT);
+  ("bool", Parser.BOOL);
+  ("of", Parser.OF);
+]
 }	
 
 rule main = parse
@@ -50,6 +54,13 @@ rule main = parse
         List.assoc id reservedWords
       with
       _ -> Parser.ID id
+     }
+| ['A'-'Z'] ['a'-'z' '0'-'9' '_' '\'']*
+    { let id = Lexing.lexeme lexbuf in
+      try 
+        List.assoc id reservedWords
+      with
+      _ -> Parser.CONSTR id
      }
 | eof { exit 0 }
 

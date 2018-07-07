@@ -4,6 +4,7 @@
 type token = 
   | WITH
   | VERT
+  | TYPE
   | TRUE
   | THEN
   | SEMISEMI
@@ -14,6 +15,7 @@ type token =
   | RARROW
   | PLUS
   | OOR
+  | OF
   | MULT
   | MINUS
   | MATCH
@@ -22,6 +24,7 @@ type token =
   | LPAREN
   | LET
   | INTV of (int)
+  | INT
   | IN
   | IF
   | ID of (Syntax.id)
@@ -31,7 +34,9 @@ type token =
   | EQ
   | ELSE
   | DFUN
+  | CONSTR of (Syntax.id)
   | CONS
+  | BOOL
   | AND
   | AAND
 

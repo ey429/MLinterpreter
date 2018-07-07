@@ -1,36 +1,104 @@
 State 0:
 toplevel' -> . toplevel [ # ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 106
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On toplevel shift to state 114
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MulLET shift to state 115
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 117
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+-- On TYPE shift to state 1
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 121
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On toplevel shift to state 129
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MulLET shift to state 130
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 132
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
 State 1:
-AExpr -> TRUE . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
+toplevel -> TYPE . ID EQ VariantExpr SEMISEMI [ # ]
+-- On ID shift to state 2
+
+State 2:
+toplevel -> TYPE ID . EQ VariantExpr SEMISEMI [ # ]
+-- On EQ shift to state 3
+
+State 3:
+toplevel -> TYPE ID EQ . VariantExpr SEMISEMI [ # ]
+-- On CONSTR shift to state 4
+-- On VariantExpr shift to state 9
+-- On ConstrExpr shift to state 11
+
+State 4:
+ConstrExpr -> CONSTR . [ VERT SEMISEMI ]
+ConstrExpr -> CONSTR . OF TypeExpr [ VERT SEMISEMI ]
+-- On OF shift to state 5
+-- On VERT reduce production ConstrExpr -> CONSTR 
+-- On SEMISEMI reduce production ConstrExpr -> CONSTR 
+
+State 5:
+ConstrExpr -> CONSTR OF . TypeExpr [ VERT SEMISEMI ]
+-- On INT shift to state 6
+-- On BOOL shift to state 7
+-- On TypeExpr shift to state 8
+
+State 6:
+TypeExpr -> INT . [ VERT SEMISEMI ]
+-- On VERT reduce production TypeExpr -> INT 
+-- On SEMISEMI reduce production TypeExpr -> INT 
+
+State 7:
+TypeExpr -> BOOL . [ VERT SEMISEMI ]
+-- On VERT reduce production TypeExpr -> BOOL 
+-- On SEMISEMI reduce production TypeExpr -> BOOL 
+
+State 8:
+ConstrExpr -> CONSTR OF TypeExpr . [ VERT SEMISEMI ]
+-- On VERT reduce production ConstrExpr -> CONSTR OF TypeExpr 
+-- On SEMISEMI reduce production ConstrExpr -> CONSTR OF TypeExpr 
+
+State 9:
+toplevel -> TYPE ID EQ VariantExpr . SEMISEMI [ # ]
+-- On SEMISEMI shift to state 10
+
+State 10:
+toplevel -> TYPE ID EQ VariantExpr SEMISEMI . [ # ]
+-- On # reduce production toplevel -> TYPE ID EQ VariantExpr SEMISEMI 
+
+State 11:
+VariantExpr -> ConstrExpr . VERT VariantExpr [ SEMISEMI ]
+VariantExpr -> ConstrExpr . [ SEMISEMI ]
+-- On VERT shift to state 12
+-- On SEMISEMI reduce production VariantExpr -> ConstrExpr 
+
+State 12:
+VariantExpr -> ConstrExpr VERT . VariantExpr [ SEMISEMI ]
+-- On CONSTR shift to state 4
+-- On VariantExpr shift to state 13
+-- On ConstrExpr shift to state 11
+
+State 13:
+VariantExpr -> ConstrExpr VERT VariantExpr . [ SEMISEMI ]
+-- On SEMISEMI reduce production VariantExpr -> ConstrExpr VERT VariantExpr 
+
+State 14:
+AExpr -> TRUE . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production AExpr -> TRUE 
 -- On VERT reduce production AExpr -> TRUE 
 -- On TRUE reduce production AExpr -> TRUE 
@@ -54,177 +122,182 @@ AExpr -> TRUE . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MUL
 -- On FALSE reduce production AExpr -> TRUE 
 -- On EQ reduce production AExpr -> TRUE 
 -- On ELSE reduce production AExpr -> TRUE 
+-- On CONSTR reduce production AExpr -> TRUE 
 -- On CONS reduce production AExpr -> TRUE 
 -- On AND reduce production AExpr -> TRUE 
 -- On AAND reduce production AExpr -> TRUE 
 
-State 2:
-MatchExpr -> MATCH . Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 94
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 15:
+MatchExpr -> MATCH . Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 109
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 3:
-AExpr -> LSQPAREN . ListExpr RSQPAREN [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On ListExpr shift to state 89
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 91
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 16:
+AExpr -> LSQPAREN . ListExpr RSQPAREN [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On ListExpr shift to state 104
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 106
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 -- On RSQPAREN reduce production ListExpr -> 
 
-State 4:
-AExpr -> LPAREN . Expr RPAREN [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 87
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 17:
+AExpr -> LPAREN . Expr RPAREN [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 102
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 5:
-LetExpr -> LET . DeclExpr IN Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
-LetExpr -> LET . REC RecDeclExpr IN Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On REC shift to state 6
--- On ID shift to state 75
--- On UnitDeclExpr shift to state 81
--- On DeclExpr shift to state 84
+State 18:
+LetExpr -> LET . DeclExpr IN Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+LetExpr -> LET . REC RecDeclExpr IN Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On REC shift to state 19
+-- On ID shift to state 90
+-- On UnitDeclExpr shift to state 96
+-- On DeclExpr shift to state 99
 
-State 6:
-LetExpr -> LET REC . RecDeclExpr IN Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On ID shift to state 7
--- On UnitRecDeclExpr shift to state 69
--- On RecDeclExpr shift to state 72
+State 19:
+LetExpr -> LET REC . RecDeclExpr IN Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On ID shift to state 20
+-- On UnitRecDeclExpr shift to state 84
+-- On RecDeclExpr shift to state 87
 
-State 7:
+State 20:
 UnitRecDeclExpr -> ID . MulID EQ Expr [ SEMISEMI IN AND ]
 UnitRecDeclExpr -> ID . EQ FUN MulID RARROW Expr [ SEMISEMI IN AND ]
--- On ID shift to state 8
--- On EQ shift to state 10
--- On MulID shift to state 66
+-- On ID shift to state 21
+-- On EQ shift to state 23
+-- On MulID shift to state 81
 
-State 8:
+State 21:
 MulID -> ID . MulID [ RARROW EQ ]
 MulID -> ID . [ RARROW EQ ]
--- On ID shift to state 8
--- On MulID shift to state 9
+-- On ID shift to state 21
+-- On MulID shift to state 22
 -- On RARROW reduce production MulID -> ID 
 -- On EQ reduce production MulID -> ID 
 
-State 9:
+State 22:
 MulID -> ID MulID . [ RARROW EQ ]
 -- On RARROW reduce production MulID -> ID MulID 
 -- On EQ reduce production MulID -> ID MulID 
 
-State 10:
+State 23:
 UnitRecDeclExpr -> ID EQ . FUN MulID RARROW Expr [ SEMISEMI IN AND ]
--- On FUN shift to state 11
+-- On FUN shift to state 24
 
-State 11:
+State 24:
 UnitRecDeclExpr -> ID EQ FUN . MulID RARROW Expr [ SEMISEMI IN AND ]
--- On ID shift to state 8
--- On MulID shift to state 12
+-- On ID shift to state 21
+-- On MulID shift to state 25
 
-State 12:
+State 25:
 UnitRecDeclExpr -> ID EQ FUN MulID . RARROW Expr [ SEMISEMI IN AND ]
--- On RARROW shift to state 13
+-- On RARROW shift to state 26
 
-State 13:
+State 26:
 UnitRecDeclExpr -> ID EQ FUN MulID RARROW . Expr [ SEMISEMI IN AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 65
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 80
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 14:
-AExpr -> INTV . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
+State 27:
+AExpr -> INTV . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production AExpr -> INTV 
 -- On VERT reduce production AExpr -> INTV 
 -- On TRUE reduce production AExpr -> INTV 
@@ -248,41 +321,43 @@ AExpr -> INTV . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MUL
 -- On FALSE reduce production AExpr -> INTV 
 -- On EQ reduce production AExpr -> INTV 
 -- On ELSE reduce production AExpr -> INTV 
+-- On CONSTR reduce production AExpr -> INTV 
 -- On CONS reduce production AExpr -> INTV 
 -- On AND reduce production AExpr -> INTV 
 -- On AAND reduce production AExpr -> INTV 
 
-State 15:
-IfExpr -> IF . Expr THEN Expr ELSE Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 60
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 28:
+IfExpr -> IF . Expr THEN Expr ELSE Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 75
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 16:
-AExpr -> ID . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
+State 29:
+AExpr -> ID . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production AExpr -> ID 
 -- On VERT reduce production AExpr -> ID 
 -- On TRUE reduce production AExpr -> ID 
@@ -306,50 +381,52 @@ AExpr -> ID . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT 
 -- On FALSE reduce production AExpr -> ID 
 -- On EQ reduce production AExpr -> ID 
 -- On ELSE reduce production AExpr -> ID 
+-- On CONSTR reduce production AExpr -> ID 
 -- On CONS reduce production AExpr -> ID 
 -- On AND reduce production AExpr -> ID 
 -- On AAND reduce production AExpr -> ID 
 
-State 17:
-FunExpr -> FUN . MulID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On ID shift to state 8
--- On MulID shift to state 18
+State 30:
+FunExpr -> FUN . MulID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On ID shift to state 21
+-- On MulID shift to state 31
 
-State 18:
-FunExpr -> FUN MulID . RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On RARROW shift to state 19
+State 31:
+FunExpr -> FUN MulID . RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On RARROW shift to state 32
 
-State 19:
-FunExpr -> FUN MulID RARROW . Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 59
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 32:
+FunExpr -> FUN MulID RARROW . Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 74
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 20:
-AExpr -> FALSE . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
+State 33:
+AExpr -> FALSE . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production AExpr -> FALSE 
 -- On VERT reduce production AExpr -> FALSE 
 -- On TRUE reduce production AExpr -> FALSE 
@@ -373,93 +450,141 @@ AExpr -> FALSE . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MU
 -- On FALSE reduce production AExpr -> FALSE 
 -- On EQ reduce production AExpr -> FALSE 
 -- On ELSE reduce production AExpr -> FALSE 
+-- On CONSTR reduce production AExpr -> FALSE 
 -- On CONS reduce production AExpr -> FALSE 
 -- On AND reduce production AExpr -> FALSE 
 -- On AAND reduce production AExpr -> FALSE 
 
-State 21:
-FunExpr -> DFUN . MulID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On ID shift to state 8
--- On MulID shift to state 22
+State 34:
+FunExpr -> DFUN . MulID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On ID shift to state 21
+-- On MulID shift to state 35
 
-State 22:
-FunExpr -> DFUN MulID . RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On RARROW shift to state 23
+State 35:
+FunExpr -> DFUN MulID . RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On RARROW shift to state 36
 
-State 23:
-FunExpr -> DFUN MulID RARROW . Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 57
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 36:
+FunExpr -> DFUN MulID RARROW . Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 73
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 24:
-EQExpr -> PExpr . EQ PExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-GTExpr -> PExpr . GT PExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-GTExpr -> PExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-LTExpr -> PExpr . LT PExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-PExpr -> PExpr . PLUS MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
-PExpr -> PExpr . MINUS MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
--- On PLUS shift to state 25
--- On MINUS shift to state 32
--- On LT shift to state 34
--- On GT shift to state 37
--- On EQ shift to state 39
+State 37:
+AExpr -> CONSTR . Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 71
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
+
+State 38:
+EQExpr -> PExpr . EQ PExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+GTExpr -> PExpr . GT PExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+GTExpr -> PExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+LTExpr -> PExpr . LT PExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr . PLUS MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr . MINUS MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On PLUS shift to state 39
+-- On MINUS shift to state 46
+-- On LT shift to state 48
+-- On GT shift to state 51
+-- On EQ shift to state 53
 -- On WITH reduce production GTExpr -> PExpr 
 -- On VERT reduce production GTExpr -> PExpr 
+-- On TRUE reduce production GTExpr -> PExpr 
 -- On THEN reduce production GTExpr -> PExpr 
 -- On SEMISEMI reduce production GTExpr -> PExpr 
 -- On SEMI reduce production GTExpr -> PExpr 
 -- On RSQPAREN reduce production GTExpr -> PExpr 
 -- On RPAREN reduce production GTExpr -> PExpr 
+-- On PLUS reduce production GTExpr -> PExpr 
 -- On OOR reduce production GTExpr -> PExpr 
+-- On MULT reduce production GTExpr -> PExpr 
+-- On MINUS reduce production GTExpr -> PExpr 
+-- On LT reduce production GTExpr -> PExpr 
+-- On LSQPAREN reduce production GTExpr -> PExpr 
+-- On LPAREN reduce production GTExpr -> PExpr 
 -- On LET reduce production GTExpr -> PExpr 
+-- On INTV reduce production GTExpr -> PExpr 
 -- On IN reduce production GTExpr -> PExpr 
+-- On ID reduce production GTExpr -> PExpr 
+-- On GT reduce production GTExpr -> PExpr 
+-- On FALSE reduce production GTExpr -> PExpr 
+-- On EQ reduce production GTExpr -> PExpr 
 -- On ELSE reduce production GTExpr -> PExpr 
+-- On CONSTR reduce production GTExpr -> PExpr 
 -- On CONS reduce production GTExpr -> PExpr 
 -- On AND reduce production GTExpr -> PExpr 
 -- On AAND reduce production GTExpr -> PExpr 
+** Conflict on PLUS MINUS LT GT EQ
 
-State 25:
-PExpr -> PExpr PLUS . MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On MExpr shift to state 26
--- On AppExpr shift to state 31
--- On AExpr shift to state 30
+State 39:
+PExpr -> PExpr PLUS . MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On MExpr shift to state 40
+-- On AppExpr shift to state 45
+-- On AExpr shift to state 44
 
-State 26:
-MExpr -> MExpr . MULT AppExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
-PExpr -> PExpr PLUS MExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
--- On MULT shift to state 27
+State 40:
+MExpr -> MExpr . MULT AppExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr PLUS MExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On MULT shift to state 41
 -- On WITH reduce production PExpr -> PExpr PLUS MExpr 
 -- On VERT reduce production PExpr -> PExpr PLUS MExpr 
+-- On TRUE reduce production PExpr -> PExpr PLUS MExpr 
 -- On THEN reduce production PExpr -> PExpr PLUS MExpr 
 -- On SEMISEMI reduce production PExpr -> PExpr PLUS MExpr 
 -- On SEMI reduce production PExpr -> PExpr PLUS MExpr 
@@ -467,40 +592,51 @@ PExpr -> PExpr PLUS MExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS 
 -- On RPAREN reduce production PExpr -> PExpr PLUS MExpr 
 -- On PLUS reduce production PExpr -> PExpr PLUS MExpr 
 -- On OOR reduce production PExpr -> PExpr PLUS MExpr 
+-- On MULT reduce production PExpr -> PExpr PLUS MExpr 
 -- On MINUS reduce production PExpr -> PExpr PLUS MExpr 
 -- On LT reduce production PExpr -> PExpr PLUS MExpr 
+-- On LSQPAREN reduce production PExpr -> PExpr PLUS MExpr 
+-- On LPAREN reduce production PExpr -> PExpr PLUS MExpr 
 -- On LET reduce production PExpr -> PExpr PLUS MExpr 
+-- On INTV reduce production PExpr -> PExpr PLUS MExpr 
 -- On IN reduce production PExpr -> PExpr PLUS MExpr 
+-- On ID reduce production PExpr -> PExpr PLUS MExpr 
 -- On GT reduce production PExpr -> PExpr PLUS MExpr 
+-- On FALSE reduce production PExpr -> PExpr PLUS MExpr 
 -- On EQ reduce production PExpr -> PExpr PLUS MExpr 
 -- On ELSE reduce production PExpr -> PExpr PLUS MExpr 
+-- On CONSTR reduce production PExpr -> PExpr PLUS MExpr 
 -- On CONS reduce production PExpr -> PExpr PLUS MExpr 
 -- On AND reduce production PExpr -> PExpr PLUS MExpr 
 -- On AAND reduce production PExpr -> PExpr PLUS MExpr 
+** Conflict on MULT
 
-State 27:
-MExpr -> MExpr MULT . AppExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On AppExpr shift to state 28
--- On AExpr shift to state 30
+State 41:
+MExpr -> MExpr MULT . AppExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On AppExpr shift to state 42
+-- On AExpr shift to state 44
 
-State 28:
-AppExpr -> AppExpr . AExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
-MExpr -> MExpr MULT AppExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On AExpr shift to state 29
+State 42:
+AppExpr -> AppExpr . AExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+MExpr -> MExpr MULT AppExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On AExpr shift to state 43
 -- On WITH reduce production MExpr -> MExpr MULT AppExpr 
 -- On VERT reduce production MExpr -> MExpr MULT AppExpr 
+-- On TRUE reduce production MExpr -> MExpr MULT AppExpr 
 -- On THEN reduce production MExpr -> MExpr MULT AppExpr 
 -- On SEMISEMI reduce production MExpr -> MExpr MULT AppExpr 
 -- On SEMI reduce production MExpr -> MExpr MULT AppExpr 
@@ -511,17 +647,24 @@ MExpr -> MExpr MULT AppExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLU
 -- On MULT reduce production MExpr -> MExpr MULT AppExpr 
 -- On MINUS reduce production MExpr -> MExpr MULT AppExpr 
 -- On LT reduce production MExpr -> MExpr MULT AppExpr 
+-- On LSQPAREN reduce production MExpr -> MExpr MULT AppExpr 
+-- On LPAREN reduce production MExpr -> MExpr MULT AppExpr 
 -- On LET reduce production MExpr -> MExpr MULT AppExpr 
+-- On INTV reduce production MExpr -> MExpr MULT AppExpr 
 -- On IN reduce production MExpr -> MExpr MULT AppExpr 
+-- On ID reduce production MExpr -> MExpr MULT AppExpr 
 -- On GT reduce production MExpr -> MExpr MULT AppExpr 
+-- On FALSE reduce production MExpr -> MExpr MULT AppExpr 
 -- On EQ reduce production MExpr -> MExpr MULT AppExpr 
 -- On ELSE reduce production MExpr -> MExpr MULT AppExpr 
+-- On CONSTR reduce production MExpr -> MExpr MULT AppExpr 
 -- On CONS reduce production MExpr -> MExpr MULT AppExpr 
 -- On AND reduce production MExpr -> MExpr MULT AppExpr 
 -- On AAND reduce production MExpr -> MExpr MULT AppExpr 
+** Conflict on TRUE LSQPAREN LPAREN INTV ID FALSE CONSTR
 
-State 29:
-AppExpr -> AppExpr AExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
+State 43:
+AppExpr -> AppExpr AExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production AppExpr -> AppExpr AExpr 
 -- On VERT reduce production AppExpr -> AppExpr AExpr 
 -- On TRUE reduce production AppExpr -> AppExpr AExpr 
@@ -545,12 +688,13 @@ AppExpr -> AppExpr AExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN P
 -- On FALSE reduce production AppExpr -> AppExpr AExpr 
 -- On EQ reduce production AppExpr -> AppExpr AExpr 
 -- On ELSE reduce production AppExpr -> AppExpr AExpr 
+-- On CONSTR reduce production AppExpr -> AppExpr AExpr 
 -- On CONS reduce production AppExpr -> AppExpr AExpr 
 -- On AND reduce production AppExpr -> AppExpr AExpr 
 -- On AAND reduce production AppExpr -> AppExpr AExpr 
 
-State 30:
-AppExpr -> AExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
+State 44:
+AppExpr -> AExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production AppExpr -> AExpr 
 -- On VERT reduce production AppExpr -> AExpr 
 -- On TRUE reduce production AppExpr -> AExpr 
@@ -574,22 +718,25 @@ AppExpr -> AExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR 
 -- On FALSE reduce production AppExpr -> AExpr 
 -- On EQ reduce production AppExpr -> AExpr 
 -- On ELSE reduce production AppExpr -> AExpr 
+-- On CONSTR reduce production AppExpr -> AExpr 
 -- On CONS reduce production AppExpr -> AExpr 
 -- On AND reduce production AppExpr -> AExpr 
 -- On AAND reduce production AppExpr -> AExpr 
 
-State 31:
-AppExpr -> AppExpr . AExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
-MExpr -> AppExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On AExpr shift to state 29
+State 45:
+AppExpr -> AppExpr . AExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+MExpr -> AppExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On AExpr shift to state 43
 -- On WITH reduce production MExpr -> AppExpr 
 -- On VERT reduce production MExpr -> AppExpr 
+-- On TRUE reduce production MExpr -> AppExpr 
 -- On THEN reduce production MExpr -> AppExpr 
 -- On SEMISEMI reduce production MExpr -> AppExpr 
 -- On SEMI reduce production MExpr -> AppExpr 
@@ -600,33 +747,42 @@ MExpr -> AppExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT 
 -- On MULT reduce production MExpr -> AppExpr 
 -- On MINUS reduce production MExpr -> AppExpr 
 -- On LT reduce production MExpr -> AppExpr 
+-- On LSQPAREN reduce production MExpr -> AppExpr 
+-- On LPAREN reduce production MExpr -> AppExpr 
 -- On LET reduce production MExpr -> AppExpr 
+-- On INTV reduce production MExpr -> AppExpr 
 -- On IN reduce production MExpr -> AppExpr 
+-- On ID reduce production MExpr -> AppExpr 
 -- On GT reduce production MExpr -> AppExpr 
+-- On FALSE reduce production MExpr -> AppExpr 
 -- On EQ reduce production MExpr -> AppExpr 
 -- On ELSE reduce production MExpr -> AppExpr 
+-- On CONSTR reduce production MExpr -> AppExpr 
 -- On CONS reduce production MExpr -> AppExpr 
 -- On AND reduce production MExpr -> AppExpr 
 -- On AAND reduce production MExpr -> AppExpr 
+** Conflict on TRUE LSQPAREN LPAREN INTV ID FALSE CONSTR
 
-State 32:
-PExpr -> PExpr MINUS . MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On MExpr shift to state 33
--- On AppExpr shift to state 31
--- On AExpr shift to state 30
+State 46:
+PExpr -> PExpr MINUS . MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On MExpr shift to state 47
+-- On AppExpr shift to state 45
+-- On AExpr shift to state 44
 
-State 33:
-MExpr -> MExpr . MULT AppExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
-PExpr -> PExpr MINUS MExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
--- On MULT shift to state 27
+State 47:
+MExpr -> MExpr . MULT AppExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr MINUS MExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On MULT shift to state 41
 -- On WITH reduce production PExpr -> PExpr MINUS MExpr 
 -- On VERT reduce production PExpr -> PExpr MINUS MExpr 
+-- On TRUE reduce production PExpr -> PExpr MINUS MExpr 
 -- On THEN reduce production PExpr -> PExpr MINUS MExpr 
 -- On SEMISEMI reduce production PExpr -> PExpr MINUS MExpr 
 -- On SEMI reduce production PExpr -> PExpr MINUS MExpr 
@@ -634,57 +790,81 @@ PExpr -> PExpr MINUS MExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS
 -- On RPAREN reduce production PExpr -> PExpr MINUS MExpr 
 -- On PLUS reduce production PExpr -> PExpr MINUS MExpr 
 -- On OOR reduce production PExpr -> PExpr MINUS MExpr 
+-- On MULT reduce production PExpr -> PExpr MINUS MExpr 
 -- On MINUS reduce production PExpr -> PExpr MINUS MExpr 
 -- On LT reduce production PExpr -> PExpr MINUS MExpr 
+-- On LSQPAREN reduce production PExpr -> PExpr MINUS MExpr 
+-- On LPAREN reduce production PExpr -> PExpr MINUS MExpr 
 -- On LET reduce production PExpr -> PExpr MINUS MExpr 
+-- On INTV reduce production PExpr -> PExpr MINUS MExpr 
 -- On IN reduce production PExpr -> PExpr MINUS MExpr 
+-- On ID reduce production PExpr -> PExpr MINUS MExpr 
 -- On GT reduce production PExpr -> PExpr MINUS MExpr 
+-- On FALSE reduce production PExpr -> PExpr MINUS MExpr 
 -- On EQ reduce production PExpr -> PExpr MINUS MExpr 
 -- On ELSE reduce production PExpr -> PExpr MINUS MExpr 
+-- On CONSTR reduce production PExpr -> PExpr MINUS MExpr 
 -- On CONS reduce production PExpr -> PExpr MINUS MExpr 
 -- On AND reduce production PExpr -> PExpr MINUS MExpr 
 -- On AAND reduce production PExpr -> PExpr MINUS MExpr 
+** Conflict on MULT
 
-State 34:
-LTExpr -> PExpr LT . PExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On PExpr shift to state 35
--- On MExpr shift to state 36
--- On AppExpr shift to state 31
--- On AExpr shift to state 30
+State 48:
+LTExpr -> PExpr LT . PExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 49
+-- On MExpr shift to state 50
+-- On AppExpr shift to state 45
+-- On AExpr shift to state 44
 
-State 35:
-LTExpr -> PExpr LT PExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-PExpr -> PExpr . PLUS MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LET IN ELSE CONS AND AAND ]
-PExpr -> PExpr . MINUS MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LET IN ELSE CONS AND AAND ]
--- On PLUS shift to state 25
--- On MINUS shift to state 32
+State 49:
+LTExpr -> PExpr LT PExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr . PLUS MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr . MINUS MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On PLUS shift to state 39
+-- On MINUS shift to state 46
 -- On WITH reduce production LTExpr -> PExpr LT PExpr 
 -- On VERT reduce production LTExpr -> PExpr LT PExpr 
+-- On TRUE reduce production LTExpr -> PExpr LT PExpr 
 -- On THEN reduce production LTExpr -> PExpr LT PExpr 
 -- On SEMISEMI reduce production LTExpr -> PExpr LT PExpr 
 -- On SEMI reduce production LTExpr -> PExpr LT PExpr 
 -- On RSQPAREN reduce production LTExpr -> PExpr LT PExpr 
 -- On RPAREN reduce production LTExpr -> PExpr LT PExpr 
+-- On PLUS reduce production LTExpr -> PExpr LT PExpr 
 -- On OOR reduce production LTExpr -> PExpr LT PExpr 
+-- On MULT reduce production LTExpr -> PExpr LT PExpr 
+-- On MINUS reduce production LTExpr -> PExpr LT PExpr 
+-- On LT reduce production LTExpr -> PExpr LT PExpr 
+-- On LSQPAREN reduce production LTExpr -> PExpr LT PExpr 
+-- On LPAREN reduce production LTExpr -> PExpr LT PExpr 
 -- On LET reduce production LTExpr -> PExpr LT PExpr 
+-- On INTV reduce production LTExpr -> PExpr LT PExpr 
 -- On IN reduce production LTExpr -> PExpr LT PExpr 
+-- On ID reduce production LTExpr -> PExpr LT PExpr 
+-- On GT reduce production LTExpr -> PExpr LT PExpr 
+-- On FALSE reduce production LTExpr -> PExpr LT PExpr 
+-- On EQ reduce production LTExpr -> PExpr LT PExpr 
 -- On ELSE reduce production LTExpr -> PExpr LT PExpr 
+-- On CONSTR reduce production LTExpr -> PExpr LT PExpr 
 -- On CONS reduce production LTExpr -> PExpr LT PExpr 
 -- On AND reduce production LTExpr -> PExpr LT PExpr 
 -- On AAND reduce production LTExpr -> PExpr LT PExpr 
+** Conflict on PLUS MINUS
 
-State 36:
-MExpr -> MExpr . MULT AppExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
-PExpr -> MExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LT LET IN GT EQ ELSE CONS AND AAND ]
--- On MULT shift to state 27
+State 50:
+MExpr -> MExpr . MULT AppExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> MExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On MULT shift to state 41
 -- On WITH reduce production PExpr -> MExpr 
 -- On VERT reduce production PExpr -> MExpr 
+-- On TRUE reduce production PExpr -> MExpr 
 -- On THEN reduce production PExpr -> MExpr 
 -- On SEMISEMI reduce production PExpr -> MExpr 
 -- On SEMI reduce production PExpr -> MExpr 
@@ -692,741 +872,1108 @@ PExpr -> MExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS L
 -- On RPAREN reduce production PExpr -> MExpr 
 -- On PLUS reduce production PExpr -> MExpr 
 -- On OOR reduce production PExpr -> MExpr 
+-- On MULT reduce production PExpr -> MExpr 
 -- On MINUS reduce production PExpr -> MExpr 
 -- On LT reduce production PExpr -> MExpr 
+-- On LSQPAREN reduce production PExpr -> MExpr 
+-- On LPAREN reduce production PExpr -> MExpr 
 -- On LET reduce production PExpr -> MExpr 
+-- On INTV reduce production PExpr -> MExpr 
 -- On IN reduce production PExpr -> MExpr 
+-- On ID reduce production PExpr -> MExpr 
 -- On GT reduce production PExpr -> MExpr 
+-- On FALSE reduce production PExpr -> MExpr 
 -- On EQ reduce production PExpr -> MExpr 
 -- On ELSE reduce production PExpr -> MExpr 
+-- On CONSTR reduce production PExpr -> MExpr 
 -- On CONS reduce production PExpr -> MExpr 
 -- On AND reduce production PExpr -> MExpr 
 -- On AAND reduce production PExpr -> MExpr 
+** Conflict on MULT
 
-State 37:
-GTExpr -> PExpr GT . PExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On PExpr shift to state 38
--- On MExpr shift to state 36
--- On AppExpr shift to state 31
--- On AExpr shift to state 30
+State 51:
+GTExpr -> PExpr GT . PExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 52
+-- On MExpr shift to state 50
+-- On AppExpr shift to state 45
+-- On AExpr shift to state 44
 
-State 38:
-GTExpr -> PExpr GT PExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-PExpr -> PExpr . PLUS MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LET IN ELSE CONS AND AAND ]
-PExpr -> PExpr . MINUS MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LET IN ELSE CONS AND AAND ]
--- On PLUS shift to state 25
--- On MINUS shift to state 32
+State 52:
+GTExpr -> PExpr GT PExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr . PLUS MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr . MINUS MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On PLUS shift to state 39
+-- On MINUS shift to state 46
 -- On WITH reduce production GTExpr -> PExpr GT PExpr 
 -- On VERT reduce production GTExpr -> PExpr GT PExpr 
+-- On TRUE reduce production GTExpr -> PExpr GT PExpr 
 -- On THEN reduce production GTExpr -> PExpr GT PExpr 
 -- On SEMISEMI reduce production GTExpr -> PExpr GT PExpr 
 -- On SEMI reduce production GTExpr -> PExpr GT PExpr 
 -- On RSQPAREN reduce production GTExpr -> PExpr GT PExpr 
 -- On RPAREN reduce production GTExpr -> PExpr GT PExpr 
+-- On PLUS reduce production GTExpr -> PExpr GT PExpr 
 -- On OOR reduce production GTExpr -> PExpr GT PExpr 
+-- On MULT reduce production GTExpr -> PExpr GT PExpr 
+-- On MINUS reduce production GTExpr -> PExpr GT PExpr 
+-- On LT reduce production GTExpr -> PExpr GT PExpr 
+-- On LSQPAREN reduce production GTExpr -> PExpr GT PExpr 
+-- On LPAREN reduce production GTExpr -> PExpr GT PExpr 
 -- On LET reduce production GTExpr -> PExpr GT PExpr 
+-- On INTV reduce production GTExpr -> PExpr GT PExpr 
 -- On IN reduce production GTExpr -> PExpr GT PExpr 
+-- On ID reduce production GTExpr -> PExpr GT PExpr 
+-- On GT reduce production GTExpr -> PExpr GT PExpr 
+-- On FALSE reduce production GTExpr -> PExpr GT PExpr 
+-- On EQ reduce production GTExpr -> PExpr GT PExpr 
 -- On ELSE reduce production GTExpr -> PExpr GT PExpr 
+-- On CONSTR reduce production GTExpr -> PExpr GT PExpr 
 -- On CONS reduce production GTExpr -> PExpr GT PExpr 
 -- On AND reduce production GTExpr -> PExpr GT PExpr 
 -- On AAND reduce production GTExpr -> PExpr GT PExpr 
+** Conflict on PLUS MINUS
 
-State 39:
-EQExpr -> PExpr EQ . PExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On PExpr shift to state 40
--- On MExpr shift to state 36
--- On AppExpr shift to state 31
--- On AExpr shift to state 30
+State 53:
+EQExpr -> PExpr EQ . PExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 54
+-- On MExpr shift to state 50
+-- On AppExpr shift to state 45
+-- On AExpr shift to state 44
 
-State 40:
-EQExpr -> PExpr EQ PExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-PExpr -> PExpr . PLUS MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LET IN ELSE CONS AND AAND ]
-PExpr -> PExpr . MINUS MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LET IN ELSE CONS AND AAND ]
--- On PLUS shift to state 25
--- On MINUS shift to state 32
+State 54:
+EQExpr -> PExpr EQ PExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr . PLUS MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr . MINUS MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On PLUS shift to state 39
+-- On MINUS shift to state 46
 -- On WITH reduce production EQExpr -> PExpr EQ PExpr 
 -- On VERT reduce production EQExpr -> PExpr EQ PExpr 
+-- On TRUE reduce production EQExpr -> PExpr EQ PExpr 
 -- On THEN reduce production EQExpr -> PExpr EQ PExpr 
 -- On SEMISEMI reduce production EQExpr -> PExpr EQ PExpr 
 -- On SEMI reduce production EQExpr -> PExpr EQ PExpr 
 -- On RSQPAREN reduce production EQExpr -> PExpr EQ PExpr 
 -- On RPAREN reduce production EQExpr -> PExpr EQ PExpr 
+-- On PLUS reduce production EQExpr -> PExpr EQ PExpr 
 -- On OOR reduce production EQExpr -> PExpr EQ PExpr 
+-- On MULT reduce production EQExpr -> PExpr EQ PExpr 
+-- On MINUS reduce production EQExpr -> PExpr EQ PExpr 
+-- On LT reduce production EQExpr -> PExpr EQ PExpr 
+-- On LSQPAREN reduce production EQExpr -> PExpr EQ PExpr 
+-- On LPAREN reduce production EQExpr -> PExpr EQ PExpr 
 -- On LET reduce production EQExpr -> PExpr EQ PExpr 
+-- On INTV reduce production EQExpr -> PExpr EQ PExpr 
 -- On IN reduce production EQExpr -> PExpr EQ PExpr 
+-- On ID reduce production EQExpr -> PExpr EQ PExpr 
+-- On GT reduce production EQExpr -> PExpr EQ PExpr 
+-- On FALSE reduce production EQExpr -> PExpr EQ PExpr 
+-- On EQ reduce production EQExpr -> PExpr EQ PExpr 
 -- On ELSE reduce production EQExpr -> PExpr EQ PExpr 
+-- On CONSTR reduce production EQExpr -> PExpr EQ PExpr 
 -- On CONS reduce production EQExpr -> PExpr EQ PExpr 
 -- On AND reduce production EQExpr -> PExpr EQ PExpr 
 -- On AAND reduce production EQExpr -> PExpr EQ PExpr 
+** Conflict on PLUS MINUS
 
-State 41:
-ConsExpr -> ORExpr . CONS ConsExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
-ConsExpr -> ORExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
-ORExpr -> ORExpr . OOR ANDExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND ]
--- On OOR shift to state 42
--- On CONS shift to state 50
+State 55:
+ConsExpr -> ORExpr . CONS ConsExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+ConsExpr -> ORExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+ORExpr -> ORExpr . OOR ANDExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On OOR shift to state 56
+-- On CONS shift to state 64
 -- On WITH reduce production ConsExpr -> ORExpr 
 -- On VERT reduce production ConsExpr -> ORExpr 
+-- On TRUE reduce production ConsExpr -> ORExpr 
 -- On THEN reduce production ConsExpr -> ORExpr 
 -- On SEMISEMI reduce production ConsExpr -> ORExpr 
 -- On SEMI reduce production ConsExpr -> ORExpr 
 -- On RSQPAREN reduce production ConsExpr -> ORExpr 
 -- On RPAREN reduce production ConsExpr -> ORExpr 
+-- On PLUS reduce production ConsExpr -> ORExpr 
+-- On OOR reduce production ConsExpr -> ORExpr 
+-- On MULT reduce production ConsExpr -> ORExpr 
+-- On MINUS reduce production ConsExpr -> ORExpr 
+-- On LT reduce production ConsExpr -> ORExpr 
+-- On LSQPAREN reduce production ConsExpr -> ORExpr 
+-- On LPAREN reduce production ConsExpr -> ORExpr 
 -- On LET reduce production ConsExpr -> ORExpr 
+-- On INTV reduce production ConsExpr -> ORExpr 
 -- On IN reduce production ConsExpr -> ORExpr 
+-- On ID reduce production ConsExpr -> ORExpr 
+-- On GT reduce production ConsExpr -> ORExpr 
+-- On FALSE reduce production ConsExpr -> ORExpr 
+-- On EQ reduce production ConsExpr -> ORExpr 
 -- On ELSE reduce production ConsExpr -> ORExpr 
+-- On CONSTR reduce production ConsExpr -> ORExpr 
+-- On CONS reduce production ConsExpr -> ORExpr 
 -- On AND reduce production ConsExpr -> ORExpr 
+-- On AAND reduce production ConsExpr -> ORExpr 
+** Conflict on OOR CONS
 
-State 42:
-ORExpr -> ORExpr OOR . ANDExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On PExpr shift to state 24
--- On MExpr shift to state 36
--- On LTExpr shift to state 43
--- On GTExpr shift to state 44
--- On EQExpr shift to state 45
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 46
--- On AExpr shift to state 30
+State 56:
+ORExpr -> ORExpr OOR . ANDExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On MExpr shift to state 50
+-- On LTExpr shift to state 57
+-- On GTExpr shift to state 58
+-- On EQExpr shift to state 59
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 60
+-- On AExpr shift to state 44
 
-State 43:
-EQExpr -> LTExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
+State 57:
+EQExpr -> LTExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production EQExpr -> LTExpr 
 -- On VERT reduce production EQExpr -> LTExpr 
+-- On TRUE reduce production EQExpr -> LTExpr 
 -- On THEN reduce production EQExpr -> LTExpr 
 -- On SEMISEMI reduce production EQExpr -> LTExpr 
 -- On SEMI reduce production EQExpr -> LTExpr 
 -- On RSQPAREN reduce production EQExpr -> LTExpr 
 -- On RPAREN reduce production EQExpr -> LTExpr 
+-- On PLUS reduce production EQExpr -> LTExpr 
 -- On OOR reduce production EQExpr -> LTExpr 
+-- On MULT reduce production EQExpr -> LTExpr 
+-- On MINUS reduce production EQExpr -> LTExpr 
+-- On LT reduce production EQExpr -> LTExpr 
+-- On LSQPAREN reduce production EQExpr -> LTExpr 
+-- On LPAREN reduce production EQExpr -> LTExpr 
 -- On LET reduce production EQExpr -> LTExpr 
+-- On INTV reduce production EQExpr -> LTExpr 
 -- On IN reduce production EQExpr -> LTExpr 
+-- On ID reduce production EQExpr -> LTExpr 
+-- On GT reduce production EQExpr -> LTExpr 
+-- On FALSE reduce production EQExpr -> LTExpr 
+-- On EQ reduce production EQExpr -> LTExpr 
 -- On ELSE reduce production EQExpr -> LTExpr 
+-- On CONSTR reduce production EQExpr -> LTExpr 
 -- On CONS reduce production EQExpr -> LTExpr 
 -- On AND reduce production EQExpr -> LTExpr 
 -- On AAND reduce production EQExpr -> LTExpr 
 
-State 44:
-LTExpr -> GTExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
+State 58:
+LTExpr -> GTExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production LTExpr -> GTExpr 
 -- On VERT reduce production LTExpr -> GTExpr 
+-- On TRUE reduce production LTExpr -> GTExpr 
 -- On THEN reduce production LTExpr -> GTExpr 
 -- On SEMISEMI reduce production LTExpr -> GTExpr 
 -- On SEMI reduce production LTExpr -> GTExpr 
 -- On RSQPAREN reduce production LTExpr -> GTExpr 
 -- On RPAREN reduce production LTExpr -> GTExpr 
+-- On PLUS reduce production LTExpr -> GTExpr 
 -- On OOR reduce production LTExpr -> GTExpr 
+-- On MULT reduce production LTExpr -> GTExpr 
+-- On MINUS reduce production LTExpr -> GTExpr 
+-- On LT reduce production LTExpr -> GTExpr 
+-- On LSQPAREN reduce production LTExpr -> GTExpr 
+-- On LPAREN reduce production LTExpr -> GTExpr 
 -- On LET reduce production LTExpr -> GTExpr 
+-- On INTV reduce production LTExpr -> GTExpr 
 -- On IN reduce production LTExpr -> GTExpr 
+-- On ID reduce production LTExpr -> GTExpr 
+-- On GT reduce production LTExpr -> GTExpr 
+-- On FALSE reduce production LTExpr -> GTExpr 
+-- On EQ reduce production LTExpr -> GTExpr 
 -- On ELSE reduce production LTExpr -> GTExpr 
+-- On CONSTR reduce production LTExpr -> GTExpr 
 -- On CONS reduce production LTExpr -> GTExpr 
 -- On AND reduce production LTExpr -> GTExpr 
 -- On AAND reduce production LTExpr -> GTExpr 
 
-State 45:
-ANDExpr -> EQExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
+State 59:
+ANDExpr -> EQExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production ANDExpr -> EQExpr 
 -- On VERT reduce production ANDExpr -> EQExpr 
+-- On TRUE reduce production ANDExpr -> EQExpr 
 -- On THEN reduce production ANDExpr -> EQExpr 
 -- On SEMISEMI reduce production ANDExpr -> EQExpr 
 -- On SEMI reduce production ANDExpr -> EQExpr 
 -- On RSQPAREN reduce production ANDExpr -> EQExpr 
 -- On RPAREN reduce production ANDExpr -> EQExpr 
+-- On PLUS reduce production ANDExpr -> EQExpr 
 -- On OOR reduce production ANDExpr -> EQExpr 
+-- On MULT reduce production ANDExpr -> EQExpr 
+-- On MINUS reduce production ANDExpr -> EQExpr 
+-- On LT reduce production ANDExpr -> EQExpr 
+-- On LSQPAREN reduce production ANDExpr -> EQExpr 
+-- On LPAREN reduce production ANDExpr -> EQExpr 
 -- On LET reduce production ANDExpr -> EQExpr 
+-- On INTV reduce production ANDExpr -> EQExpr 
 -- On IN reduce production ANDExpr -> EQExpr 
+-- On ID reduce production ANDExpr -> EQExpr 
+-- On GT reduce production ANDExpr -> EQExpr 
+-- On FALSE reduce production ANDExpr -> EQExpr 
+-- On EQ reduce production ANDExpr -> EQExpr 
 -- On ELSE reduce production ANDExpr -> EQExpr 
+-- On CONSTR reduce production ANDExpr -> EQExpr 
 -- On CONS reduce production ANDExpr -> EQExpr 
 -- On AND reduce production ANDExpr -> EQExpr 
 -- On AAND reduce production ANDExpr -> EQExpr 
 
-State 46:
-ANDExpr -> ANDExpr . AAND LTExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-ORExpr -> ORExpr OOR ANDExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND ]
--- On AAND shift to state 47
+State 60:
+ANDExpr -> ANDExpr . AAND LTExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+ORExpr -> ORExpr OOR ANDExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On AAND shift to state 61
 -- On WITH reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On VERT reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On TRUE reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On THEN reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On SEMISEMI reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On SEMI reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On RSQPAREN reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On RPAREN reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On PLUS reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On OOR reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On MULT reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On MINUS reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On LT reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On LSQPAREN reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On LPAREN reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On LET reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On INTV reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On IN reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On ID reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On GT reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On FALSE reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On EQ reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On ELSE reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On CONSTR reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On CONS reduce production ORExpr -> ORExpr OOR ANDExpr 
 -- On AND reduce production ORExpr -> ORExpr OOR ANDExpr 
+-- On AAND reduce production ORExpr -> ORExpr OOR ANDExpr 
+** Conflict on AAND
 
-State 47:
-ANDExpr -> ANDExpr AAND . LTExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On PExpr shift to state 48
--- On MExpr shift to state 36
--- On LTExpr shift to state 49
--- On GTExpr shift to state 44
--- On AppExpr shift to state 31
--- On AExpr shift to state 30
+State 61:
+ANDExpr -> ANDExpr AAND . LTExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 62
+-- On MExpr shift to state 50
+-- On LTExpr shift to state 63
+-- On GTExpr shift to state 58
+-- On AppExpr shift to state 45
+-- On AExpr shift to state 44
 
-State 48:
-GTExpr -> PExpr . GT PExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-GTExpr -> PExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-LTExpr -> PExpr . LT PExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-PExpr -> PExpr . PLUS MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LT LET IN GT ELSE CONS AND AAND ]
-PExpr -> PExpr . MINUS MExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MINUS LT LET IN GT ELSE CONS AND AAND ]
--- On PLUS shift to state 25
--- On MINUS shift to state 32
--- On LT shift to state 34
--- On GT shift to state 37
+State 62:
+GTExpr -> PExpr . GT PExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+GTExpr -> PExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+LTExpr -> PExpr . LT PExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr . PLUS MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+PExpr -> PExpr . MINUS MExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On PLUS shift to state 39
+-- On MINUS shift to state 46
+-- On LT shift to state 48
+-- On GT shift to state 51
 -- On WITH reduce production GTExpr -> PExpr 
 -- On VERT reduce production GTExpr -> PExpr 
+-- On TRUE reduce production GTExpr -> PExpr 
 -- On THEN reduce production GTExpr -> PExpr 
 -- On SEMISEMI reduce production GTExpr -> PExpr 
 -- On SEMI reduce production GTExpr -> PExpr 
 -- On RSQPAREN reduce production GTExpr -> PExpr 
 -- On RPAREN reduce production GTExpr -> PExpr 
+-- On PLUS reduce production GTExpr -> PExpr 
 -- On OOR reduce production GTExpr -> PExpr 
+-- On MULT reduce production GTExpr -> PExpr 
+-- On MINUS reduce production GTExpr -> PExpr 
+-- On LT reduce production GTExpr -> PExpr 
+-- On LSQPAREN reduce production GTExpr -> PExpr 
+-- On LPAREN reduce production GTExpr -> PExpr 
 -- On LET reduce production GTExpr -> PExpr 
+-- On INTV reduce production GTExpr -> PExpr 
 -- On IN reduce production GTExpr -> PExpr 
+-- On ID reduce production GTExpr -> PExpr 
+-- On GT reduce production GTExpr -> PExpr 
+-- On FALSE reduce production GTExpr -> PExpr 
+-- On EQ reduce production GTExpr -> PExpr 
 -- On ELSE reduce production GTExpr -> PExpr 
+-- On CONSTR reduce production GTExpr -> PExpr 
 -- On CONS reduce production GTExpr -> PExpr 
 -- On AND reduce production GTExpr -> PExpr 
 -- On AAND reduce production GTExpr -> PExpr 
+** Conflict on PLUS MINUS LT GT
 
-State 49:
-ANDExpr -> ANDExpr AAND LTExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
+State 63:
+ANDExpr -> ANDExpr AAND LTExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On VERT reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On TRUE reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On THEN reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On SEMISEMI reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On SEMI reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On RSQPAREN reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On RPAREN reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On PLUS reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On OOR reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On MULT reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On MINUS reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On LT reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On LSQPAREN reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On LPAREN reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On LET reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On INTV reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On IN reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On ID reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On GT reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On FALSE reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On EQ reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On ELSE reduce production ANDExpr -> ANDExpr AAND LTExpr 
+-- On CONSTR reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On CONS reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On AND reduce production ANDExpr -> ANDExpr AAND LTExpr 
 -- On AAND reduce production ANDExpr -> ANDExpr AAND LTExpr 
 
-State 50:
-ConsExpr -> ORExpr CONS . ConsExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On INTV shift to state 14
--- On ID shift to state 16
--- On FALSE shift to state 20
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MExpr shift to state 36
--- On LTExpr shift to state 43
--- On GTExpr shift to state 44
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 51
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 64:
+ConsExpr -> ORExpr CONS . ConsExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On INTV shift to state 27
+-- On ID shift to state 29
+-- On FALSE shift to state 33
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MExpr shift to state 50
+-- On LTExpr shift to state 57
+-- On GTExpr shift to state 58
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 65
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 51:
-ConsExpr -> ORExpr CONS ConsExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 65:
+ConsExpr -> ORExpr CONS ConsExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production ConsExpr -> ORExpr CONS ConsExpr 
 -- On VERT reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On TRUE reduce production ConsExpr -> ORExpr CONS ConsExpr 
 -- On THEN reduce production ConsExpr -> ORExpr CONS ConsExpr 
 -- On SEMISEMI reduce production ConsExpr -> ORExpr CONS ConsExpr 
 -- On SEMI reduce production ConsExpr -> ORExpr CONS ConsExpr 
 -- On RSQPAREN reduce production ConsExpr -> ORExpr CONS ConsExpr 
 -- On RPAREN reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On PLUS reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On OOR reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On MULT reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On MINUS reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On LT reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On LSQPAREN reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On LPAREN reduce production ConsExpr -> ORExpr CONS ConsExpr 
 -- On LET reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On INTV reduce production ConsExpr -> ORExpr CONS ConsExpr 
 -- On IN reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On ID reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On GT reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On FALSE reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On EQ reduce production ConsExpr -> ORExpr CONS ConsExpr 
 -- On ELSE reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On CONSTR reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On CONS reduce production ConsExpr -> ORExpr CONS ConsExpr 
 -- On AND reduce production ConsExpr -> ORExpr CONS ConsExpr 
+-- On AAND reduce production ConsExpr -> ORExpr CONS ConsExpr 
 
-State 52:
-ANDExpr -> ANDExpr . AAND LTExpr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND AAND ]
-ORExpr -> ANDExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN OOR LET IN ELSE CONS AND ]
--- On AAND shift to state 47
+State 66:
+ANDExpr -> ANDExpr . AAND LTExpr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+ORExpr -> ANDExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On AAND shift to state 61
 -- On WITH reduce production ORExpr -> ANDExpr 
 -- On VERT reduce production ORExpr -> ANDExpr 
+-- On TRUE reduce production ORExpr -> ANDExpr 
 -- On THEN reduce production ORExpr -> ANDExpr 
 -- On SEMISEMI reduce production ORExpr -> ANDExpr 
 -- On SEMI reduce production ORExpr -> ANDExpr 
 -- On RSQPAREN reduce production ORExpr -> ANDExpr 
 -- On RPAREN reduce production ORExpr -> ANDExpr 
+-- On PLUS reduce production ORExpr -> ANDExpr 
 -- On OOR reduce production ORExpr -> ANDExpr 
+-- On MULT reduce production ORExpr -> ANDExpr 
+-- On MINUS reduce production ORExpr -> ANDExpr 
+-- On LT reduce production ORExpr -> ANDExpr 
+-- On LSQPAREN reduce production ORExpr -> ANDExpr 
+-- On LPAREN reduce production ORExpr -> ANDExpr 
 -- On LET reduce production ORExpr -> ANDExpr 
+-- On INTV reduce production ORExpr -> ANDExpr 
 -- On IN reduce production ORExpr -> ANDExpr 
+-- On ID reduce production ORExpr -> ANDExpr 
+-- On GT reduce production ORExpr -> ANDExpr 
+-- On FALSE reduce production ORExpr -> ANDExpr 
+-- On EQ reduce production ORExpr -> ANDExpr 
 -- On ELSE reduce production ORExpr -> ANDExpr 
+-- On CONSTR reduce production ORExpr -> ANDExpr 
 -- On CONS reduce production ORExpr -> ANDExpr 
 -- On AND reduce production ORExpr -> ANDExpr 
+-- On AAND reduce production ORExpr -> ANDExpr 
+** Conflict on AAND
 
-State 53:
-Expr -> MatchExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 67:
+Expr -> MatchExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production Expr -> MatchExpr 
 -- On VERT reduce production Expr -> MatchExpr 
+-- On TRUE reduce production Expr -> MatchExpr 
 -- On THEN reduce production Expr -> MatchExpr 
 -- On SEMISEMI reduce production Expr -> MatchExpr 
 -- On SEMI reduce production Expr -> MatchExpr 
 -- On RSQPAREN reduce production Expr -> MatchExpr 
 -- On RPAREN reduce production Expr -> MatchExpr 
+-- On PLUS reduce production Expr -> MatchExpr 
+-- On OOR reduce production Expr -> MatchExpr 
+-- On MULT reduce production Expr -> MatchExpr 
+-- On MINUS reduce production Expr -> MatchExpr 
+-- On LT reduce production Expr -> MatchExpr 
+-- On LSQPAREN reduce production Expr -> MatchExpr 
+-- On LPAREN reduce production Expr -> MatchExpr 
 -- On LET reduce production Expr -> MatchExpr 
+-- On INTV reduce production Expr -> MatchExpr 
 -- On IN reduce production Expr -> MatchExpr 
+-- On ID reduce production Expr -> MatchExpr 
+-- On GT reduce production Expr -> MatchExpr 
+-- On FALSE reduce production Expr -> MatchExpr 
+-- On EQ reduce production Expr -> MatchExpr 
 -- On ELSE reduce production Expr -> MatchExpr 
+-- On CONSTR reduce production Expr -> MatchExpr 
+-- On CONS reduce production Expr -> MatchExpr 
 -- On AND reduce production Expr -> MatchExpr 
+-- On AAND reduce production Expr -> MatchExpr 
 
-State 54:
-Expr -> LetExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 68:
+Expr -> LetExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production Expr -> LetExpr 
 -- On VERT reduce production Expr -> LetExpr 
+-- On TRUE reduce production Expr -> LetExpr 
 -- On THEN reduce production Expr -> LetExpr 
 -- On SEMISEMI reduce production Expr -> LetExpr 
 -- On SEMI reduce production Expr -> LetExpr 
 -- On RSQPAREN reduce production Expr -> LetExpr 
 -- On RPAREN reduce production Expr -> LetExpr 
+-- On PLUS reduce production Expr -> LetExpr 
+-- On OOR reduce production Expr -> LetExpr 
+-- On MULT reduce production Expr -> LetExpr 
+-- On MINUS reduce production Expr -> LetExpr 
+-- On LT reduce production Expr -> LetExpr 
+-- On LSQPAREN reduce production Expr -> LetExpr 
+-- On LPAREN reduce production Expr -> LetExpr 
 -- On LET reduce production Expr -> LetExpr 
+-- On INTV reduce production Expr -> LetExpr 
 -- On IN reduce production Expr -> LetExpr 
+-- On ID reduce production Expr -> LetExpr 
+-- On GT reduce production Expr -> LetExpr 
+-- On FALSE reduce production Expr -> LetExpr 
+-- On EQ reduce production Expr -> LetExpr 
 -- On ELSE reduce production Expr -> LetExpr 
+-- On CONSTR reduce production Expr -> LetExpr 
+-- On CONS reduce production Expr -> LetExpr 
 -- On AND reduce production Expr -> LetExpr 
+-- On AAND reduce production Expr -> LetExpr 
 
-State 55:
-Expr -> IfExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 69:
+Expr -> IfExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production Expr -> IfExpr 
 -- On VERT reduce production Expr -> IfExpr 
+-- On TRUE reduce production Expr -> IfExpr 
 -- On THEN reduce production Expr -> IfExpr 
 -- On SEMISEMI reduce production Expr -> IfExpr 
 -- On SEMI reduce production Expr -> IfExpr 
 -- On RSQPAREN reduce production Expr -> IfExpr 
 -- On RPAREN reduce production Expr -> IfExpr 
+-- On PLUS reduce production Expr -> IfExpr 
+-- On OOR reduce production Expr -> IfExpr 
+-- On MULT reduce production Expr -> IfExpr 
+-- On MINUS reduce production Expr -> IfExpr 
+-- On LT reduce production Expr -> IfExpr 
+-- On LSQPAREN reduce production Expr -> IfExpr 
+-- On LPAREN reduce production Expr -> IfExpr 
 -- On LET reduce production Expr -> IfExpr 
+-- On INTV reduce production Expr -> IfExpr 
 -- On IN reduce production Expr -> IfExpr 
+-- On ID reduce production Expr -> IfExpr 
+-- On GT reduce production Expr -> IfExpr 
+-- On FALSE reduce production Expr -> IfExpr 
+-- On EQ reduce production Expr -> IfExpr 
 -- On ELSE reduce production Expr -> IfExpr 
+-- On CONSTR reduce production Expr -> IfExpr 
+-- On CONS reduce production Expr -> IfExpr 
 -- On AND reduce production Expr -> IfExpr 
+-- On AAND reduce production Expr -> IfExpr 
 
-State 56:
-Expr -> FunExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 70:
+Expr -> FunExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production Expr -> FunExpr 
 -- On VERT reduce production Expr -> FunExpr 
+-- On TRUE reduce production Expr -> FunExpr 
 -- On THEN reduce production Expr -> FunExpr 
 -- On SEMISEMI reduce production Expr -> FunExpr 
 -- On SEMI reduce production Expr -> FunExpr 
 -- On RSQPAREN reduce production Expr -> FunExpr 
 -- On RPAREN reduce production Expr -> FunExpr 
+-- On PLUS reduce production Expr -> FunExpr 
+-- On OOR reduce production Expr -> FunExpr 
+-- On MULT reduce production Expr -> FunExpr 
+-- On MINUS reduce production Expr -> FunExpr 
+-- On LT reduce production Expr -> FunExpr 
+-- On LSQPAREN reduce production Expr -> FunExpr 
+-- On LPAREN reduce production Expr -> FunExpr 
 -- On LET reduce production Expr -> FunExpr 
+-- On INTV reduce production Expr -> FunExpr 
 -- On IN reduce production Expr -> FunExpr 
+-- On ID reduce production Expr -> FunExpr 
+-- On GT reduce production Expr -> FunExpr 
+-- On FALSE reduce production Expr -> FunExpr 
+-- On EQ reduce production Expr -> FunExpr 
 -- On ELSE reduce production Expr -> FunExpr 
+-- On CONSTR reduce production Expr -> FunExpr 
+-- On CONS reduce production Expr -> FunExpr 
 -- On AND reduce production Expr -> FunExpr 
+-- On AAND reduce production Expr -> FunExpr 
 
-State 57:
-FunExpr -> DFUN MulID RARROW Expr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On WITH reduce production FunExpr -> DFUN MulID RARROW Expr 
--- On VERT reduce production FunExpr -> DFUN MulID RARROW Expr 
--- On THEN reduce production FunExpr -> DFUN MulID RARROW Expr 
--- On SEMISEMI reduce production FunExpr -> DFUN MulID RARROW Expr 
--- On SEMI reduce production FunExpr -> DFUN MulID RARROW Expr 
--- On RSQPAREN reduce production FunExpr -> DFUN MulID RARROW Expr 
--- On RPAREN reduce production FunExpr -> DFUN MulID RARROW Expr 
--- On LET reduce production FunExpr -> DFUN MulID RARROW Expr 
--- On IN reduce production FunExpr -> DFUN MulID RARROW Expr 
--- On ELSE reduce production FunExpr -> DFUN MulID RARROW Expr 
--- On AND reduce production FunExpr -> DFUN MulID RARROW Expr 
+State 71:
+AExpr -> CONSTR Expr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On WITH reduce production AExpr -> CONSTR Expr 
+-- On VERT reduce production AExpr -> CONSTR Expr 
+-- On TRUE reduce production AExpr -> CONSTR Expr 
+-- On THEN reduce production AExpr -> CONSTR Expr 
+-- On SEMISEMI reduce production AExpr -> CONSTR Expr 
+-- On SEMI reduce production AExpr -> CONSTR Expr 
+-- On RSQPAREN reduce production AExpr -> CONSTR Expr 
+-- On RPAREN reduce production AExpr -> CONSTR Expr 
+-- On PLUS reduce production AExpr -> CONSTR Expr 
+-- On OOR reduce production AExpr -> CONSTR Expr 
+-- On MULT reduce production AExpr -> CONSTR Expr 
+-- On MINUS reduce production AExpr -> CONSTR Expr 
+-- On LT reduce production AExpr -> CONSTR Expr 
+-- On LSQPAREN reduce production AExpr -> CONSTR Expr 
+-- On LPAREN reduce production AExpr -> CONSTR Expr 
+-- On LET reduce production AExpr -> CONSTR Expr 
+-- On INTV reduce production AExpr -> CONSTR Expr 
+-- On IN reduce production AExpr -> CONSTR Expr 
+-- On ID reduce production AExpr -> CONSTR Expr 
+-- On GT reduce production AExpr -> CONSTR Expr 
+-- On FALSE reduce production AExpr -> CONSTR Expr 
+-- On EQ reduce production AExpr -> CONSTR Expr 
+-- On ELSE reduce production AExpr -> CONSTR Expr 
+-- On CONSTR reduce production AExpr -> CONSTR Expr 
+-- On CONS reduce production AExpr -> CONSTR Expr 
+-- On AND reduce production AExpr -> CONSTR Expr 
+-- On AAND reduce production AExpr -> CONSTR Expr 
 
-State 58:
-Expr -> ConsExpr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 72:
+Expr -> ConsExpr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production Expr -> ConsExpr 
 -- On VERT reduce production Expr -> ConsExpr 
+-- On TRUE reduce production Expr -> ConsExpr 
 -- On THEN reduce production Expr -> ConsExpr 
 -- On SEMISEMI reduce production Expr -> ConsExpr 
 -- On SEMI reduce production Expr -> ConsExpr 
 -- On RSQPAREN reduce production Expr -> ConsExpr 
 -- On RPAREN reduce production Expr -> ConsExpr 
+-- On PLUS reduce production Expr -> ConsExpr 
+-- On OOR reduce production Expr -> ConsExpr 
+-- On MULT reduce production Expr -> ConsExpr 
+-- On MINUS reduce production Expr -> ConsExpr 
+-- On LT reduce production Expr -> ConsExpr 
+-- On LSQPAREN reduce production Expr -> ConsExpr 
+-- On LPAREN reduce production Expr -> ConsExpr 
 -- On LET reduce production Expr -> ConsExpr 
+-- On INTV reduce production Expr -> ConsExpr 
 -- On IN reduce production Expr -> ConsExpr 
+-- On ID reduce production Expr -> ConsExpr 
+-- On GT reduce production Expr -> ConsExpr 
+-- On FALSE reduce production Expr -> ConsExpr 
+-- On EQ reduce production Expr -> ConsExpr 
 -- On ELSE reduce production Expr -> ConsExpr 
+-- On CONSTR reduce production Expr -> ConsExpr 
+-- On CONS reduce production Expr -> ConsExpr 
 -- On AND reduce production Expr -> ConsExpr 
+-- On AAND reduce production Expr -> ConsExpr 
 
-State 59:
-FunExpr -> FUN MulID RARROW Expr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 73:
+FunExpr -> DFUN MulID RARROW Expr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On WITH reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On VERT reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On TRUE reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On THEN reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On SEMISEMI reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On SEMI reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On RSQPAREN reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On RPAREN reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On PLUS reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On OOR reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On MULT reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On MINUS reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On LT reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On LSQPAREN reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On LPAREN reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On LET reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On INTV reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On IN reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On ID reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On GT reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On FALSE reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On EQ reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On ELSE reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On CONSTR reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On CONS reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On AND reduce production FunExpr -> DFUN MulID RARROW Expr 
+-- On AAND reduce production FunExpr -> DFUN MulID RARROW Expr 
+
+State 74:
+FunExpr -> FUN MulID RARROW Expr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production FunExpr -> FUN MulID RARROW Expr 
 -- On VERT reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On TRUE reduce production FunExpr -> FUN MulID RARROW Expr 
 -- On THEN reduce production FunExpr -> FUN MulID RARROW Expr 
 -- On SEMISEMI reduce production FunExpr -> FUN MulID RARROW Expr 
 -- On SEMI reduce production FunExpr -> FUN MulID RARROW Expr 
 -- On RSQPAREN reduce production FunExpr -> FUN MulID RARROW Expr 
 -- On RPAREN reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On PLUS reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On OOR reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On MULT reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On MINUS reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On LT reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On LSQPAREN reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On LPAREN reduce production FunExpr -> FUN MulID RARROW Expr 
 -- On LET reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On INTV reduce production FunExpr -> FUN MulID RARROW Expr 
 -- On IN reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On ID reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On GT reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On FALSE reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On EQ reduce production FunExpr -> FUN MulID RARROW Expr 
 -- On ELSE reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On CONSTR reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On CONS reduce production FunExpr -> FUN MulID RARROW Expr 
 -- On AND reduce production FunExpr -> FUN MulID RARROW Expr 
+-- On AAND reduce production FunExpr -> FUN MulID RARROW Expr 
 
-State 60:
-IfExpr -> IF Expr . THEN Expr ELSE Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On THEN shift to state 61
+State 75:
+IfExpr -> IF Expr . THEN Expr ELSE Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On THEN shift to state 76
 
-State 61:
-IfExpr -> IF Expr THEN . Expr ELSE Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 62
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 76:
+IfExpr -> IF Expr THEN . Expr ELSE Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 77
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 62:
-IfExpr -> IF Expr THEN Expr . ELSE Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On ELSE shift to state 63
+State 77:
+IfExpr -> IF Expr THEN Expr . ELSE Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On ELSE shift to state 78
 
-State 63:
-IfExpr -> IF Expr THEN Expr ELSE . Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 64
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 78:
+IfExpr -> IF Expr THEN Expr ELSE . Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 79
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 64:
-IfExpr -> IF Expr THEN Expr ELSE Expr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 79:
+IfExpr -> IF Expr THEN Expr ELSE Expr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 -- On VERT reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On TRUE reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 -- On THEN reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 -- On SEMISEMI reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 -- On SEMI reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 -- On RSQPAREN reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 -- On RPAREN reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On PLUS reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On OOR reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On MULT reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On MINUS reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On LT reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On LSQPAREN reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On LPAREN reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 -- On LET reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On INTV reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 -- On IN reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On ID reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On GT reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On FALSE reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On EQ reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 -- On ELSE reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On CONSTR reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On CONS reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 -- On AND reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
+-- On AAND reduce production IfExpr -> IF Expr THEN Expr ELSE Expr 
 
-State 65:
+State 80:
 UnitRecDeclExpr -> ID EQ FUN MulID RARROW Expr . [ SEMISEMI IN AND ]
 -- On SEMISEMI reduce production UnitRecDeclExpr -> ID EQ FUN MulID RARROW Expr 
 -- On IN reduce production UnitRecDeclExpr -> ID EQ FUN MulID RARROW Expr 
 -- On AND reduce production UnitRecDeclExpr -> ID EQ FUN MulID RARROW Expr 
 
-State 66:
+State 81:
 UnitRecDeclExpr -> ID MulID . EQ Expr [ SEMISEMI IN AND ]
--- On EQ shift to state 67
+-- On EQ shift to state 82
 
-State 67:
+State 82:
 UnitRecDeclExpr -> ID MulID EQ . Expr [ SEMISEMI IN AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 68
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 83
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 68:
+State 83:
 UnitRecDeclExpr -> ID MulID EQ Expr . [ SEMISEMI IN AND ]
 -- On SEMISEMI reduce production UnitRecDeclExpr -> ID MulID EQ Expr 
 -- On IN reduce production UnitRecDeclExpr -> ID MulID EQ Expr 
 -- On AND reduce production UnitRecDeclExpr -> ID MulID EQ Expr 
 
-State 69:
+State 84:
 RecDeclExpr -> UnitRecDeclExpr . AND RecDeclExpr [ SEMISEMI IN ]
 RecDeclExpr -> UnitRecDeclExpr . [ SEMISEMI IN ]
--- On AND shift to state 70
+-- On AND shift to state 85
 -- On SEMISEMI reduce production RecDeclExpr -> UnitRecDeclExpr 
 -- On IN reduce production RecDeclExpr -> UnitRecDeclExpr 
 
-State 70:
+State 85:
 RecDeclExpr -> UnitRecDeclExpr AND . RecDeclExpr [ SEMISEMI IN ]
--- On ID shift to state 7
--- On UnitRecDeclExpr shift to state 69
--- On RecDeclExpr shift to state 71
+-- On ID shift to state 20
+-- On UnitRecDeclExpr shift to state 84
+-- On RecDeclExpr shift to state 86
 
-State 71:
+State 86:
 RecDeclExpr -> UnitRecDeclExpr AND RecDeclExpr . [ SEMISEMI IN ]
 -- On SEMISEMI reduce production RecDeclExpr -> UnitRecDeclExpr AND RecDeclExpr 
 -- On IN reduce production RecDeclExpr -> UnitRecDeclExpr AND RecDeclExpr 
 
-State 72:
-LetExpr -> LET REC RecDeclExpr . IN Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On IN shift to state 73
+State 87:
+LetExpr -> LET REC RecDeclExpr . IN Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On IN shift to state 88
 
-State 73:
-LetExpr -> LET REC RecDeclExpr IN . Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 74
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 88:
+LetExpr -> LET REC RecDeclExpr IN . Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 89
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 74:
-LetExpr -> LET REC RecDeclExpr IN Expr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 89:
+LetExpr -> LET REC RecDeclExpr IN Expr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 -- On VERT reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On TRUE reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 -- On THEN reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 -- On SEMISEMI reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 -- On SEMI reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 -- On RSQPAREN reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 -- On RPAREN reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On PLUS reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On OOR reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On MULT reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On MINUS reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On LT reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On LSQPAREN reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On LPAREN reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 -- On LET reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On INTV reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 -- On IN reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On ID reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On GT reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On FALSE reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On EQ reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 -- On ELSE reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On CONSTR reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On CONS reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 -- On AND reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
+-- On AAND reduce production LetExpr -> LET REC RecDeclExpr IN Expr 
 
-State 75:
+State 90:
 UnitDeclExpr -> ID . EQ Expr [ SEMISEMI LET IN AND ]
 UnitDeclExpr -> ID . MulID EQ Expr [ SEMISEMI LET IN AND ]
--- On ID shift to state 8
--- On EQ shift to state 76
--- On MulID shift to state 78
+-- On ID shift to state 21
+-- On EQ shift to state 91
+-- On MulID shift to state 93
 
-State 76:
+State 91:
 UnitDeclExpr -> ID EQ . Expr [ SEMISEMI LET IN AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 77
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 92
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 77:
+State 92:
 UnitDeclExpr -> ID EQ Expr . [ SEMISEMI LET IN AND ]
 -- On SEMISEMI reduce production UnitDeclExpr -> ID EQ Expr 
 -- On LET reduce production UnitDeclExpr -> ID EQ Expr 
 -- On IN reduce production UnitDeclExpr -> ID EQ Expr 
 -- On AND reduce production UnitDeclExpr -> ID EQ Expr 
 
-State 78:
+State 93:
 UnitDeclExpr -> ID MulID . EQ Expr [ SEMISEMI LET IN AND ]
--- On EQ shift to state 79
+-- On EQ shift to state 94
 
-State 79:
+State 94:
 UnitDeclExpr -> ID MulID EQ . Expr [ SEMISEMI LET IN AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 80
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 95
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 80:
+State 95:
 UnitDeclExpr -> ID MulID EQ Expr . [ SEMISEMI LET IN AND ]
 -- On SEMISEMI reduce production UnitDeclExpr -> ID MulID EQ Expr 
 -- On LET reduce production UnitDeclExpr -> ID MulID EQ Expr 
 -- On IN reduce production UnitDeclExpr -> ID MulID EQ Expr 
 -- On AND reduce production UnitDeclExpr -> ID MulID EQ Expr 
 
-State 81:
+State 96:
 DeclExpr -> UnitDeclExpr . AND DeclExpr [ SEMISEMI LET IN ]
 DeclExpr -> UnitDeclExpr . [ SEMISEMI LET IN ]
--- On AND shift to state 82
+-- On AND shift to state 97
 -- On SEMISEMI reduce production DeclExpr -> UnitDeclExpr 
 -- On LET reduce production DeclExpr -> UnitDeclExpr 
 -- On IN reduce production DeclExpr -> UnitDeclExpr 
 
-State 82:
+State 97:
 DeclExpr -> UnitDeclExpr AND . DeclExpr [ SEMISEMI LET IN ]
--- On ID shift to state 75
--- On UnitDeclExpr shift to state 81
--- On DeclExpr shift to state 83
+-- On ID shift to state 90
+-- On UnitDeclExpr shift to state 96
+-- On DeclExpr shift to state 98
 
-State 83:
+State 98:
 DeclExpr -> UnitDeclExpr AND DeclExpr . [ SEMISEMI LET IN ]
 -- On SEMISEMI reduce production DeclExpr -> UnitDeclExpr AND DeclExpr 
 -- On LET reduce production DeclExpr -> UnitDeclExpr AND DeclExpr 
 -- On IN reduce production DeclExpr -> UnitDeclExpr AND DeclExpr 
 
-State 84:
-LetExpr -> LET DeclExpr . IN Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On IN shift to state 85
+State 99:
+LetExpr -> LET DeclExpr . IN Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On IN shift to state 100
 
-State 85:
-LetExpr -> LET DeclExpr IN . Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 86
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 100:
+LetExpr -> LET DeclExpr IN . Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 101
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 86:
-LetExpr -> LET DeclExpr IN Expr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 101:
+LetExpr -> LET DeclExpr IN Expr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production LetExpr -> LET DeclExpr IN Expr 
 -- On VERT reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On TRUE reduce production LetExpr -> LET DeclExpr IN Expr 
 -- On THEN reduce production LetExpr -> LET DeclExpr IN Expr 
 -- On SEMISEMI reduce production LetExpr -> LET DeclExpr IN Expr 
 -- On SEMI reduce production LetExpr -> LET DeclExpr IN Expr 
 -- On RSQPAREN reduce production LetExpr -> LET DeclExpr IN Expr 
 -- On RPAREN reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On PLUS reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On OOR reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On MULT reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On MINUS reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On LT reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On LSQPAREN reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On LPAREN reduce production LetExpr -> LET DeclExpr IN Expr 
 -- On LET reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On INTV reduce production LetExpr -> LET DeclExpr IN Expr 
 -- On IN reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On ID reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On GT reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On FALSE reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On EQ reduce production LetExpr -> LET DeclExpr IN Expr 
 -- On ELSE reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On CONSTR reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On CONS reduce production LetExpr -> LET DeclExpr IN Expr 
 -- On AND reduce production LetExpr -> LET DeclExpr IN Expr 
+-- On AAND reduce production LetExpr -> LET DeclExpr IN Expr 
 
-State 87:
-AExpr -> LPAREN Expr . RPAREN [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
--- On RPAREN shift to state 88
+State 102:
+AExpr -> LPAREN Expr . RPAREN [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On RPAREN shift to state 103
 
-State 88:
-AExpr -> LPAREN Expr RPAREN . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
+State 103:
+AExpr -> LPAREN Expr RPAREN . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production AExpr -> LPAREN Expr RPAREN 
 -- On VERT reduce production AExpr -> LPAREN Expr RPAREN 
 -- On TRUE reduce production AExpr -> LPAREN Expr RPAREN 
@@ -1450,16 +1997,17 @@ AExpr -> LPAREN Expr RPAREN . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPARE
 -- On FALSE reduce production AExpr -> LPAREN Expr RPAREN 
 -- On EQ reduce production AExpr -> LPAREN Expr RPAREN 
 -- On ELSE reduce production AExpr -> LPAREN Expr RPAREN 
+-- On CONSTR reduce production AExpr -> LPAREN Expr RPAREN 
 -- On CONS reduce production AExpr -> LPAREN Expr RPAREN 
 -- On AND reduce production AExpr -> LPAREN Expr RPAREN 
 -- On AAND reduce production AExpr -> LPAREN Expr RPAREN 
 
-State 89:
-AExpr -> LSQPAREN ListExpr . RSQPAREN [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
--- On RSQPAREN shift to state 90
+State 104:
+AExpr -> LSQPAREN ListExpr . RSQPAREN [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On RSQPAREN shift to state 105
 
-State 90:
-AExpr -> LSQPAREN ListExpr RSQPAREN . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONS AND AAND ]
+State 105:
+AExpr -> LSQPAREN ListExpr RSQPAREN . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production AExpr -> LSQPAREN ListExpr RSQPAREN 
 -- On VERT reduce production AExpr -> LSQPAREN ListExpr RSQPAREN 
 -- On TRUE reduce production AExpr -> LSQPAREN ListExpr RSQPAREN 
@@ -1483,235 +2031,255 @@ AExpr -> LSQPAREN ListExpr RSQPAREN . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAR
 -- On FALSE reduce production AExpr -> LSQPAREN ListExpr RSQPAREN 
 -- On EQ reduce production AExpr -> LSQPAREN ListExpr RSQPAREN 
 -- On ELSE reduce production AExpr -> LSQPAREN ListExpr RSQPAREN 
+-- On CONSTR reduce production AExpr -> LSQPAREN ListExpr RSQPAREN 
 -- On CONS reduce production AExpr -> LSQPAREN ListExpr RSQPAREN 
 -- On AND reduce production AExpr -> LSQPAREN ListExpr RSQPAREN 
 -- On AAND reduce production AExpr -> LSQPAREN ListExpr RSQPAREN 
 
-State 91:
+State 106:
 ListExpr -> Expr . SEMI ListExpr [ RSQPAREN ]
 ListExpr -> Expr . SEMI [ RSQPAREN ]
 ListExpr -> Expr . [ RSQPAREN ]
--- On SEMI shift to state 92
+-- On SEMI shift to state 107
 -- On RSQPAREN reduce production ListExpr -> Expr 
 
-State 92:
+State 107:
 ListExpr -> Expr SEMI . ListExpr [ RSQPAREN ]
 ListExpr -> Expr SEMI . [ RSQPAREN ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On ListExpr shift to state 93
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 91
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On ListExpr shift to state 108
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 106
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 -- On RSQPAREN reduce production ListExpr -> Expr SEMI 
 -- On RSQPAREN reduce production ListExpr -> 
 ** Conflict on RSQPAREN
 
-State 93:
+State 108:
 ListExpr -> Expr SEMI ListExpr . [ RSQPAREN ]
 -- On RSQPAREN reduce production ListExpr -> Expr SEMI ListExpr 
 
-State 94:
-MatchExpr -> MATCH Expr . WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On WITH shift to state 95
+State 109:
+MatchExpr -> MATCH Expr . WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On WITH shift to state 110
 
-State 95:
-MatchExpr -> MATCH Expr WITH . LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On LSQPAREN shift to state 96
+State 110:
+MatchExpr -> MATCH Expr WITH . LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On LSQPAREN shift to state 111
 
-State 96:
-MatchExpr -> MATCH Expr WITH LSQPAREN . RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On RSQPAREN shift to state 97
+State 111:
+MatchExpr -> MATCH Expr WITH LSQPAREN . RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On RSQPAREN shift to state 112
 
-State 97:
-MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN . RARROW Expr VERT ID CONS ID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On RARROW shift to state 98
+State 112:
+MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN . RARROW Expr VERT ID CONS ID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On RARROW shift to state 113
 
-State 98:
-MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW . Expr VERT ID CONS ID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 99
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 113:
+MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW . Expr VERT ID CONS ID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 114
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 99:
-MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr . VERT ID CONS ID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On VERT shift to state 100
+State 114:
+MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr . VERT ID CONS ID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On VERT shift to state 115
 
-State 100:
-MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT . ID CONS ID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On ID shift to state 101
+State 115:
+MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT . ID CONS ID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On ID shift to state 116
 
-State 101:
-MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID . CONS ID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On CONS shift to state 102
+State 116:
+MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID . CONS ID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On CONS shift to state 117
 
-State 102:
-MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS . ID RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On ID shift to state 103
+State 117:
+MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS . ID RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On ID shift to state 118
 
-State 103:
-MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID . RARROW Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On RARROW shift to state 104
+State 118:
+MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID . RARROW Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On RARROW shift to state 119
 
-State 104:
-MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW . Expr [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
--- On TRUE shift to state 1
--- On MATCH shift to state 2
--- On LSQPAREN shift to state 3
--- On LPAREN shift to state 4
--- On LET shift to state 5
--- On INTV shift to state 14
--- On IF shift to state 15
--- On ID shift to state 16
--- On FUN shift to state 17
--- On FALSE shift to state 20
--- On DFUN shift to state 21
--- On PExpr shift to state 24
--- On ORExpr shift to state 41
--- On MatchExpr shift to state 53
--- On MExpr shift to state 36
--- On LetExpr shift to state 54
--- On LTExpr shift to state 43
--- On IfExpr shift to state 55
--- On GTExpr shift to state 44
--- On FunExpr shift to state 56
--- On Expr shift to state 105
--- On EQExpr shift to state 45
--- On ConsExpr shift to state 58
--- On AppExpr shift to state 31
--- On ANDExpr shift to state 52
--- On AExpr shift to state 30
+State 119:
+MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW . Expr [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
+-- On TRUE shift to state 14
+-- On MATCH shift to state 15
+-- On LSQPAREN shift to state 16
+-- On LPAREN shift to state 17
+-- On LET shift to state 18
+-- On INTV shift to state 27
+-- On IF shift to state 28
+-- On ID shift to state 29
+-- On FUN shift to state 30
+-- On FALSE shift to state 33
+-- On DFUN shift to state 34
+-- On CONSTR shift to state 37
+-- On PExpr shift to state 38
+-- On ORExpr shift to state 55
+-- On MatchExpr shift to state 67
+-- On MExpr shift to state 50
+-- On LetExpr shift to state 68
+-- On LTExpr shift to state 57
+-- On IfExpr shift to state 69
+-- On GTExpr shift to state 58
+-- On FunExpr shift to state 70
+-- On Expr shift to state 120
+-- On EQExpr shift to state 59
+-- On ConsExpr shift to state 72
+-- On AppExpr shift to state 45
+-- On ANDExpr shift to state 66
+-- On AExpr shift to state 44
 
-State 105:
-MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr . [ WITH VERT THEN SEMISEMI SEMI RSQPAREN RPAREN LET IN ELSE AND ]
+State 120:
+MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr . [ WITH VERT TRUE THEN SEMISEMI SEMI RSQPAREN RPAREN PLUS OOR MULT MINUS LT LSQPAREN LPAREN LET INTV IN ID GT FALSE EQ ELSE CONSTR CONS AND AAND ]
 -- On WITH reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 -- On VERT reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On TRUE reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 -- On THEN reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 -- On SEMISEMI reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 -- On SEMI reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 -- On RSQPAREN reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 -- On RPAREN reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On PLUS reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On OOR reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On MULT reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On MINUS reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On LT reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On LSQPAREN reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On LPAREN reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 -- On LET reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On INTV reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 -- On IN reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On ID reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On GT reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On FALSE reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On EQ reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 -- On ELSE reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On CONSTR reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On CONS reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 -- On AND reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
+-- On AAND reduce production MatchExpr -> MATCH Expr WITH LSQPAREN RSQPAREN RARROW Expr VERT ID CONS ID RARROW Expr 
 
-State 106:
+State 121:
 LetExpr -> LET . DeclExpr IN Expr [ SEMISEMI ]
 LetExpr -> LET . REC RecDeclExpr IN Expr [ SEMISEMI ]
 MulLET -> LET . DeclExpr MulLET [ SEMISEMI ]
 MulLET -> LET . DeclExpr [ SEMISEMI ]
 toplevel -> LET . REC RecDeclExpr SEMISEMI [ # ]
--- On REC shift to state 107
--- On ID shift to state 75
--- On UnitDeclExpr shift to state 81
--- On DeclExpr shift to state 110
+-- On REC shift to state 122
+-- On ID shift to state 90
+-- On UnitDeclExpr shift to state 96
+-- On DeclExpr shift to state 125
 
-State 107:
+State 122:
 LetExpr -> LET REC . RecDeclExpr IN Expr [ SEMISEMI ]
 toplevel -> LET REC . RecDeclExpr SEMISEMI [ # ]
--- On ID shift to state 7
--- On UnitRecDeclExpr shift to state 69
--- On RecDeclExpr shift to state 108
+-- On ID shift to state 20
+-- On UnitRecDeclExpr shift to state 84
+-- On RecDeclExpr shift to state 123
 
-State 108:
+State 123:
 LetExpr -> LET REC RecDeclExpr . IN Expr [ SEMISEMI ]
 toplevel -> LET REC RecDeclExpr . SEMISEMI [ # ]
--- On SEMISEMI shift to state 109
--- On IN shift to state 73
+-- On SEMISEMI shift to state 124
+-- On IN shift to state 88
 
-State 109:
+State 124:
 toplevel -> LET REC RecDeclExpr SEMISEMI . [ # ]
 -- On # reduce production toplevel -> LET REC RecDeclExpr SEMISEMI 
 
-State 110:
+State 125:
 LetExpr -> LET DeclExpr . IN Expr [ SEMISEMI ]
 MulLET -> LET DeclExpr . MulLET [ SEMISEMI ]
 MulLET -> LET DeclExpr . [ SEMISEMI ]
--- On LET shift to state 111
--- On IN shift to state 85
--- On MulLET shift to state 113
+-- On LET shift to state 126
+-- On IN shift to state 100
+-- On MulLET shift to state 128
 -- On SEMISEMI reduce production MulLET -> LET DeclExpr 
 
-State 111:
+State 126:
 MulLET -> LET . DeclExpr MulLET [ SEMISEMI ]
 MulLET -> LET . DeclExpr [ SEMISEMI ]
--- On ID shift to state 75
--- On UnitDeclExpr shift to state 81
--- On DeclExpr shift to state 112
+-- On ID shift to state 90
+-- On UnitDeclExpr shift to state 96
+-- On DeclExpr shift to state 127
 
-State 112:
+State 127:
 MulLET -> LET DeclExpr . MulLET [ SEMISEMI ]
 MulLET -> LET DeclExpr . [ SEMISEMI ]
--- On LET shift to state 111
--- On MulLET shift to state 113
+-- On LET shift to state 126
+-- On MulLET shift to state 128
 -- On SEMISEMI reduce production MulLET -> LET DeclExpr 
 
-State 113:
+State 128:
 MulLET -> LET DeclExpr MulLET . [ SEMISEMI ]
 -- On SEMISEMI reduce production MulLET -> LET DeclExpr MulLET 
 
-State 114:
+State 129:
 toplevel' -> toplevel . [ # ]
 -- On # accept toplevel
 
-State 115:
+State 130:
 toplevel -> MulLET . SEMISEMI [ # ]
--- On SEMISEMI shift to state 116
+-- On SEMISEMI shift to state 131
 
-State 116:
+State 131:
 toplevel -> MulLET SEMISEMI . [ # ]
 -- On # reduce production toplevel -> MulLET SEMISEMI 
 
-State 117:
+State 132:
 toplevel -> Expr . SEMISEMI [ # ]
--- On SEMISEMI shift to state 118
+-- On SEMISEMI shift to state 133
 
-State 118:
+State 133:
 toplevel -> Expr SEMISEMI . [ # ]
 -- On # reduce production toplevel -> Expr SEMISEMI 
 

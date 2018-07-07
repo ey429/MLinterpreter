@@ -10,9 +10,12 @@ open Syntax
 %token REC
 %token LSQPAREN RSQPAREN SEMI CONS
 %token MATCH WITH VERT
+%token TYPE OF
+%token INT BOOL
 
 %token <int> INTV
 %token <Syntax.id> ID
+%token <Syntax.id> CONSTR
 
 %start toplevel
 %type <Syntax.program> toplevel
@@ -22,6 +25,7 @@ toplevel :
     e=Expr SEMISEMI { Exp e }
   | m=MulLET SEMISEMI { Decl m }
 	|	LET REC d=RecDeclExpr SEMISEMI { RecDecl d }
+	| TYPE x=ID EQ l=VariantExpr SEMISEMI { TypeDecl (x, l) }
 
 MulLET :
   | LET d=DeclExpr m=MulLET { d :: m }
@@ -63,7 +67,7 @@ UnitDeclExpr :
 	| f=ID p=MulID EQ e=Expr { (f, FunExp (p, e)) }
 	
 MatchExpr :
-	MATCH e1=Expr WITH LSQPAREN RSQPAREN RARROW e2=Expr VERT x1=ID CONS x2=ID RARROW e3=Expr { MatchExp (e1, e2, e3, x1, x2) } 
+		MATCH e1=Expr WITH LSQPAREN RSQPAREN RARROW e2=Expr VERT x1=ID CONS x2=ID RARROW e3=Expr { MatchExp (e1, e2, e3, x1, x2) } 
 
 ConsExpr :
 		l=ORExpr CONS r=ConsExpr { BinOp (Cons, l, r) }
@@ -109,6 +113,7 @@ AExpr :
   | i=ID   { Var i }
   | LPAREN e=Expr RPAREN { e }
   | LSQPAREN e=ListExpr RSQPAREN { ListExp e }
+  | x=CONSTR e=Expr { ConstrExp (x, e) } 
   
 ListExpr :
 		e=Expr SEMI l=ListExpr { e :: l }
@@ -118,3 +123,15 @@ ListExpr :
 
 IfExpr :
     IF c=Expr THEN t=Expr ELSE e=Expr { IfExp (c, t, e) }
+    
+VariantExpr :
+		c=ConstrExpr VERT l=VariantExpr { c :: l }
+	| c=ConstrExpr { [c] }
+
+ConstrExpr :
+		x=CONSTR { (x, TyNone) }
+	| x=CONSTR OF e=TypeExpr { (x, e) }
+
+TypeExpr :
+		INT { TyInt }
+	| BOOL { TyBool }	

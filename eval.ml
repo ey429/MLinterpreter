@@ -12,6 +12,7 @@ type exval =
   | ProcV of id * exp * dnval Environment.t ref
   | DProcV of id * exp
   | ListV of dnval list
+  | VariantV of id * dnval
 and dnval = exval
 
 exception Error of string
@@ -30,6 +31,7 @@ let rec string_of_exval = function
 				| [x] -> string_of_exval x
 				| [] -> ""
 			in "[" ^ (string_of_list lst) ^ "]"
+	| VariantV (id, v) -> id ^ " " ^ (string_of_exval v)
 			
 let pp_val v = print_string (string_of_exval v)
 
@@ -133,6 +135,8 @@ let rec eval_exp env = function
 										else err ("Non-function value is applied")
 								| _ -> err ("Non-function value is applied")))
 *)
+	| ConstrExp (id, exp) ->
+			VariantV (id, eval_exp env exp)
 
 let eval_decl env = function
     Exp e -> let v = eval_exp env e in ([("-", v)], env)

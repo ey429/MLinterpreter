@@ -3,6 +3,14 @@ type id = string
 
 type binOp = Plus | Minus | Mult | Eq | Lt | Gt | And | Or | Cons
 
+type tyvar = int
+
+type ty = TyInt | TyBool | TyVar of tyvar | TyFun of ty * ty | TyList of ty | TyVariant of string | TyNone
+
+type tysc = TyScheme of tyvar list * ty
+
+let tysc_of_ty ty = TyScheme ([], ty)
+
 type exp =
   | Var of id
   | ILit of int
@@ -16,19 +24,11 @@ type exp =
   | ListExp of exp list
   | AppExp of exp * exp
   | LetRecExp of ((id * (id list) * exp) list) * exp
-
+  | ConstrExp of id * exp
 
 type program = 
     Exp of exp
   | Decl of ((id * exp) list) list
   | RecDecl of (id * (id list) * exp) list
-  
-
-type tyvar = int
-
-type ty = TyInt | TyBool | TyVar of tyvar | TyFun of ty * ty | TyList of ty | TyNone
-
-type tysc = TyScheme of tyvar list * ty
-
-let tysc_of_ty ty = TyScheme ([], ty)
+ 	| TypeDecl of id * ((id * ty) list)
 
