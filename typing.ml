@@ -112,7 +112,7 @@ let ty_prim op ty1 ty2 = match op with
     Plus -> ([(ty1, TyInt); (ty2, TyInt)], TyInt)
   | Minus -> ([(ty1, TyInt); (ty2, TyInt)], TyInt)
   | Mult -> ([(ty1, TyInt); (ty2, TyInt)], TyInt)
-  | Eq -> ([(ty1, TyInt); (ty2, TyInt)], TyBool)
+  | Eq -> ([(ty1, ty2)], TyBool)
   | Lt -> ([(ty1, TyInt); (ty2, TyInt)], TyBool)
   | Gt -> ([(ty1, TyInt); (ty2, TyInt)], TyBool)
   | And -> ([(ty1, TyBool); (ty2, TyBool)], TyBool)
@@ -201,13 +201,12 @@ let rec ty_exp tyenv = function
 				| [] -> ty_exp tyenv exp)
 	| MatchExp (exp1, exp2, exp3, x1, x2) ->
 			let alpha = fresh_tyvar () in
-			let beta = fresh_tyvar () in
 			let (s1, ty1) = ty_exp tyenv exp1 in
 			let (s2, ty2) = ty_exp tyenv exp2 in
 			let tyenv' = Environment.extend x1 (tysc_of_ty alpha) (Environment.extend x2 (tysc_of_ty (TyList alpha)) tyenv) in
 			let (s3, ty3) = ty_exp tyenv' exp3 in
-			let eqs = (ty1, TyList alpha) :: (ty2, beta) :: (ty3, beta) :: (eqs_of_subst s1) @ (eqs_of_subst s2) @ (eqs_of_subst s3) in
-			let s = unify eqs in (s, subst_type s beta)
+			let eqs = (ty1, TyList alpha) :: (ty2, ty3) :: (eqs_of_subst s1) @ (eqs_of_subst s2) @ (eqs_of_subst s3) in
+			let s = unify eqs in (s, subst_type s ty2)
 	| ListExp explist -> 
 			let alpha = fresh_tyvar () in
 			let rec ty_list eqs = function

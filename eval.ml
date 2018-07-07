@@ -37,7 +37,7 @@ let apply_prim op arg1 arg2 = match op, arg1, arg2 with
     Plus, IntV i1, IntV i2 -> IntV (i1 + i2)
   | Minus, IntV i1, IntV i2 -> IntV (i1 - i2)
   | Mult, IntV i1, IntV i2 -> IntV (i1 * i2)
-  | Eq, IntV i1, IntV i2 -> BoolV (i1 = i2)
+  | Eq, v1, v2 -> BoolV (v1 = v2)
   | Lt, IntV i1, IntV i2 -> BoolV (i1 < i2)
   | Gt, IntV i1, IntV i2 -> BoolV (i1 > i2)
   | And, BoolV b1, BoolV b2 -> BoolV (b1 && b2)

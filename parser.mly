@@ -35,8 +35,8 @@ Expr :
   | e=MatchExpr { e }
   
 FunExpr :
-		FUN m=MulID RARROW e=Expr { FunExp (m, e) }
-	| DFUN m=MulID RARROW e=Expr { DFunExp (m, e) }
+		FUN p=MulID RARROW e=Expr { FunExp (p, e) }
+	| DFUN p=MulID RARROW e=Expr { DFunExp (p, e) }
 	
 MulID :
 		x=ID m=MulID { x :: m }
@@ -68,6 +68,7 @@ MatchExpr :
 ConsExpr :
 		l=ORExpr CONS r=ConsExpr { BinOp (Cons, l, r) }
 	| e=ORExpr { e }
+
 ORExpr :
 		l=ORExpr OOR r=ANDExpr { BinOp (Or, l, r) }
 	| e=ANDExpr { e }

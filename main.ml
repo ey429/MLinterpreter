@@ -3,7 +3,6 @@ open Eval
 open Util
 open Typing
 
-
 let rec read_eval_print env tyenv =
   print_string "# ";
   flush stdout;
@@ -24,16 +23,12 @@ let rec read_eval_print env tyenv =
 				| _ -> read_eval_print newenv newtyenv)
 		in print_eqs tys eqs
 	with 
-			Error s ->
+			Typing.Error s | Eval.Error s | Failure s ->
 				print_string (s);
 				print_newline();
 				read_eval_print env tyenv
 		|	Parser.Error ->
 				print_string ("Parser Error");
-				print_newline();
-				read_eval_print env tyenv
-		|	Failure s ->
-				print_string (s);
 				print_newline();
 				read_eval_print env tyenv
 
@@ -72,18 +67,14 @@ let rec read_eval_print env =
 				| [] -> read_eval_print newenv
 		in print_eqs eqs
 	with 
-		Error s ->
-			print_string (s);
-			print_newline();
-			read_eval_print env
-	|	Parser.Error ->
-			print_string ("Parser Error");
-			print_newline();
-			read_eval_print env
-	|	Failure s ->
-			print_string (s);
-			print_newline();
-			read_eval_print env		
+			Eval.Error s | Failure s ->
+				print_string (s);
+				print_newline();
+				read_eval_print env
+		|	Parser.Error ->
+				print_string ("Parser Error");
+				print_newline();
+				read_eval_print env
 
 let initial_env =
 	Environment.extend "i" (IntV 1)
@@ -93,5 +84,5 @@ let initial_env =
 					(Environment.extend "v" (IntV 5)
 						(Environment.extend "x" (IntV 10) Environment.empty)))))
 
-let _ = read_eval_print initial_env *)
-
+let _ = read_eval_print initial_env
+*)
