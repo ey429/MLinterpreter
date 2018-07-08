@@ -16,9 +16,10 @@ let fresh_tyvar =
 		in body
 
 let rec freevar_ty = function
-	| TyVar tyvar -> MySet.singleton (tyvar)
+	  TyVar tyvar -> MySet.singleton (tyvar)
 	| TyFun (ty1, ty2) -> MySet.union (freevar_ty ty1) (freevar_ty ty2)
 	| TyList ty -> freevar_ty ty
+	| TyTuple tys -> MySet.bigunion (MySet.from_list (List.map freevar_ty tys))
 	| _ -> MySet.empty
 	
 let rec string_of_ty free = function
@@ -36,12 +37,25 @@ let rec string_of_ty free = function
 			let s1, free' = string_of_ty free ty1 in
 			let s2, free'' = string_of_ty free' ty2 in 
 				((match ty1 with
-						TyFun (_, _) -> "(" ^ s1 ^ ")"
+						TyFun _ -> "(" ^ s1 ^ ")"
 					| _ -> s1) ^ " -> " ^ s2, free'')
 	| TyList ty -> 
 			let s, free' = string_of_ty free ty in
 				(s ^ " list", free')
 	| TyVariant s -> (s, free)
+	| TyTuple tys ->
+			let cover s = function
+					TyFun _ | TyTuple _ -> "(" ^ s ^ ")"
+				| _ -> s
+			in
+			let rec string_of_tuple s free = function
+					hd :: md :: tl ->
+						let s', free' = string_of_ty free hd in
+							string_of_tuple (s ^ (cover s' hd) ^ " * ") free' (md :: tl)
+				| [x] ->
+						let s', free' = string_of_ty free x in (s ^ (cover s' x), free')
+				| [] -> (s, free)
+			in string_of_tuple "" free tys
 	| _ -> ("-", free)
 
 let pp_ty ty = 
@@ -57,6 +71,7 @@ let rec replace (s_tyvar, s_ty) = function
 	| TyFun (ty1, ty2) -> TyFun (replace (s_tyvar, s_ty) ty1, replace (s_tyvar, s_ty) ty2)
 	| TyList ty -> TyList (replace (s_tyvar, s_ty) ty)
 	| TyVariant s -> TyVariant s
+	| TyTuple tys -> TyTuple (List.map (replace (s_tyvar, s_ty)) tys)
 	| _ -> TyNone
 
 let rec subst_type subst ty1 = 
@@ -64,17 +79,13 @@ let rec subst_type subst ty1 =
 			((tyvar, ty2) :: tl) -> subst_type tl (replace (tyvar, ty2) ty1)
 		| [] -> ty1)
 
-let rec map f = function
-		hd :: tl -> (f hd) :: (map f tl)
-	| [] -> []
-
 let eqs_of_subst subst =
 	let eq_of_subst (tyvar, ty) = (TyVar tyvar, ty) in
-		map eq_of_subst subst
+		List.map eq_of_subst subst
 
 let replace_eqs s eqs = 
 	let replace_eq s (l, r) = (replace s l, replace s r) in
-		map (replace_eq s) eqs
+		List.map (replace_eq s) eqs
 
 let rec unify = function
 		(ty1, ty2) :: tl ->
@@ -88,6 +99,15 @@ let rec unify = function
 					| TyVariant s1, TyVariant s2 ->
 							if s1 = s2 then unify tl
 							else err ("Type error")
+					| TyTuple tys1, TyTuple tys2 ->
+							let rec add_eq eqs = function
+									ty1' :: tl1, ty2' :: tl2 ->
+										add_eq ((ty1', ty2') :: eqs) (tl1, tl2)
+								| [], [] -> eqs
+								| _ -> err ("Type error")
+							in
+							let eqs = add_eq tl (tys1, tys2) in
+								unify eqs	
 					| TyVar tyvar, ty | ty, TyVar tyvar -> 
 							let free = freevar_ty ty in
 								if MySet.member tyvar free then err ("Type error")
@@ -237,6 +257,16 @@ let rec ty_exp tyenv varenv = function
 			let (s1, ty1) = ty_exp tyenv varenv exp in
 			let eqs = (ty, ty1) :: (eqs_of_subst s1) in
 			let s = unify eqs in (s, TyVariant varname)
+	| TupleExp explist -> 
+			let rec ty_tuple = function
+					exp :: tl ->
+						let (s, ty) = ty_exp tyenv varenv exp in
+						let (eqs', tys') = ty_tuple tl in
+							((eqs_of_subst s) @ eqs', ty :: tys')
+				| [] -> ([], [])
+			in
+			let (eqs, tys) = ty_tuple explist in
+			let s = unify eqs in (s, subst_type s (TyTuple tys))
 	| _ -> ([], TyNone)
 
 let ty_decl tyenv varenv = function

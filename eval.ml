@@ -13,6 +13,7 @@ type exval =
   | DProcV of id * exp
   | ListV of dnval list
   | VariantV of id * dnval
+  | TupleV of dnval list
 and dnval = exval
 
 exception Error of string
@@ -32,6 +33,12 @@ let rec string_of_exval = function
 				| [] -> ""
 			in "[" ^ (string_of_list lst) ^ "]"
 	| VariantV (id, v) -> id ^ " " ^ (string_of_exval v)
+	| TupleV tuple ->
+			let rec string_of_tuple = function
+					hd :: md :: tl -> (string_of_exval hd) ^ ", " ^ (string_of_tuple (md :: tl))
+				| [x] -> string_of_exval x
+				| [] -> ""
+			in "(" ^ (string_of_tuple tuple) ^ ")"
 			
 let pp_val v = print_string (string_of_exval v)
 
@@ -117,6 +124,15 @@ let rec eval_exp env = function
 					| [] -> [])
 			in
 				ListV (eval_explist explist)
+	| ConstrExp (id, exp) ->
+			VariantV (id, eval_exp env exp)
+	| TupleExp explist -> 
+			let rec eval_explist explist =
+				(match explist with
+						exp :: tl -> (eval_exp env exp) :: (eval_explist tl) 
+					| [] -> [])
+			in
+				TupleV (eval_explist explist)
 	| AppExp (exp1, exp2) ->
 			let func = eval_exp env exp1 in
 			let arg = eval_exp env exp2 in 
@@ -135,8 +151,6 @@ let rec eval_exp env = function
 										else err ("Non-function value is applied")
 								| _ -> err ("Non-function value is applied")))
 *)
-	| ConstrExp (id, exp) ->
-			VariantV (id, eval_exp env exp)
 
 let eval_decl env = function
     Exp e -> let v = eval_exp env e in ([("-", v)], env)
@@ -172,3 +186,4 @@ let eval_decl env = function
 						insert_env rest
 				| [] -> ()
 			in insert_env dummyenvs; (eqs, newenv)
+	| _ -> err ("Runtime error")

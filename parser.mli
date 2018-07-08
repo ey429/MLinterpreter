@@ -36,6 +36,7 @@ type token =
   | DFUN
   | CONSTR of (Syntax.id)
   | CONS
+  | COMMA
   | BOOL
   | AND
   | AAND

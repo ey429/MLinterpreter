@@ -5,7 +5,7 @@ type binOp = Plus | Minus | Mult | Eq | Lt | Gt | And | Or | Cons
 
 type tyvar = int
 
-type ty = TyInt | TyBool | TyVar of tyvar | TyFun of ty * ty | TyList of ty | TyVariant of string | TyNone
+type ty = TyInt | TyBool | TyVar of tyvar | TyFun of ty * ty | TyList of ty | TyVariant of string | TyTuple of ty list | TyNone
 
 type tysc = TyScheme of tyvar list * ty
 
@@ -25,6 +25,7 @@ type exp =
   | AppExp of exp * exp
   | LetRecExp of ((id * (id list) * exp) list) * exp
   | ConstrExp of id * exp
+  | TupleExp of exp list
 
 type program = 
     Exp of exp

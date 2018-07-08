@@ -12,6 +12,7 @@ open Syntax
 %token MATCH WITH VERT
 %token TYPE OF
 %token INT BOOL
+%token COMMA
 
 %token <int> INTV
 %token <Syntax.id> ID
@@ -113,13 +114,18 @@ AExpr :
   | i=ID   { Var i }
   | LPAREN e=Expr RPAREN { e }
   | LSQPAREN e=ListExpr RSQPAREN { ListExp e }
-  | x=CONSTR e=Expr { ConstrExp (x, e) } 
+  | x=CONSTR e=Expr { ConstrExp (x, e) }
+  | LPAREN t=TupleExpr RPAREN { TupleExp t }
   
 ListExpr :
 		e=Expr SEMI l=ListExpr { e :: l }
 	|	e=Expr SEMI { [e] }
 	| e=Expr { [e] }
 	| { [] }
+
+TupleExpr :
+		e=Expr COMMA l=TupleExpr { e :: l }
+	| e=Expr { [e] }
 
 IfExpr :
     IF c=Expr THEN t=Expr ELSE e=Expr { IfExp (c, t, e) }

@@ -1,5 +1,5 @@
 
-** Conflict (reduce/reduce) in state 107.
+** Conflict (reduce/reduce) in state 112.
 ** Token involved: RSQPAREN
 ** This state is reached from toplevel after reading:
 
@@ -21,18 +21,51 @@ AExpr
 LSQPAREN ListExpr RSQPAREN // lookahead token appears
          (?)
 
-** In state 107, looking ahead at RSQPAREN, reducing production
+** In state 112, looking ahead at RSQPAREN, reducing production
 ** ListExpr -> Expr SEMI 
 ** is permitted because of the following sub-derivation:
 
 Expr SEMI . 
 
-** In state 107, looking ahead at RSQPAREN, reducing production
+** In state 112, looking ahead at RSQPAREN, reducing production
 ** ListExpr -> 
 ** is permitted because of the following sub-derivation:
 
 Expr SEMI ListExpr // lookahead token is inherited
           . 
+
+** Conflict (shift/reduce) in state 104.
+** Token involved: RPAREN
+** This state is reached from toplevel after reading:
+
+LPAREN Expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+toplevel 
+Expr SEMISEMI 
+ConsExpr 
+ORExpr CONS ConsExpr 
+ANDExpr 
+EQExpr 
+PExpr EQ PExpr 
+MExpr 
+AppExpr 
+AExpr 
+(?)
+
+** In state 104, looking ahead at RPAREN, shifting is permitted
+** because of the following sub-derivation:
+
+LPAREN Expr . RPAREN 
+
+** In state 104, looking ahead at RPAREN, reducing production
+** TupleExpr -> Expr 
+** is permitted because of the following sub-derivation:
+
+LPAREN TupleExpr RPAREN // lookahead token appears
+       Expr . 
 
 ** Conflict (shift/reduce) in state 66.
 ** Token involved: AAND
