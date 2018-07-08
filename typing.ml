@@ -145,6 +145,26 @@ let ty_prim op ty1 ty2 = match op with
   | Or -> ([(ty1, TyBool); (ty2, TyBool)], TyBool)
   | Cons -> ([(TyList ty1, ty2)], TyList ty1)
 
+let rec pattern_match = function
+		TupleExp mlist ->
+			let rec read_tuple = function
+					mexp' :: m_tl ->
+						let (pair1, ty) = pattern_match mexp' in
+						let (pair2, tylist) = read_tuple m_tl in
+							(pair1 @ pair2, ty :: tylist)
+				| [] -> ([], [])
+			in
+			let (pair, tylist) = read_tuple mlist in
+				(pair, TyTuple tylist)
+	| Var id ->
+			let alpha = fresh_tyvar () in
+				([(id, alpha)], alpha)
+	| _ -> err ("Matching failed")
+
+let rec pair_to_env tyenv first_env s = function
+		(id, ty) :: tl -> Environment.extend id (closure ty first_env s) (pair_to_env tyenv first_env s tl)
+	| [] -> tyenv
+
 let rec ty_exp tyenv varenv = function
     Var x -> 
       (try 
@@ -169,11 +189,14 @@ let rec ty_exp tyenv varenv = function
   | LetExp (decl, exp) ->
 			let rec extend_env first_env (eqs, tyenv) decl =
 				(match decl with
-						(id, exp) :: tl -> 
-							if exists_var id tl then err ("Duplicated declaration in let: " ^ id)
-							else
-								let (s, ty) = ty_exp first_env varenv exp in
-									extend_env first_env ((eqs_of_subst s) @ eqs, (Environment.extend id (closure ty first_env s) tyenv)) tl
+						(mexp, exp) :: tl -> 
+(*							if exists_var id tl then err ("Duplicated declaration in let: " ^ id) *)
+							let (s, ty) = ty_exp first_env varenv exp in
+							let (pair, mty) = pattern_match mexp in
+							let eqs' = (ty, mty) :: (eqs_of_subst s) in
+							let s' = unify eqs' in
+							let pair' = List.map (fun (x, y) -> (x, subst_type s' y)) pair in
+								extend_env first_env ((eqs_of_subst s') @ eqs, pair_to_env tyenv first_env s' pair') tl
 					| [] -> (eqs, tyenv))
 			in
 				let (eqs, newenv) = extend_env tyenv ([], tyenv) decl in
@@ -279,11 +302,15 @@ let ty_decl tyenv varenv = function
 					decl :: tl ->
 						let rec extend_env first_env (tys, tyenv) decl =
 							(match decl with
-									(id, exp) :: tl ->
-										if exists_var id tl then err ("Duplicated declaration in let: " ^ id)
-										else
-											let (s, ty) = ty_exp first_env varenv exp in 
-												extend_env first_env (tys @ [ty], (Environment.extend id (closure ty first_env s) tyenv)) tl
+									(mexp, exp) :: tl -> 
+			(*							if exists_var id tl then err ("Duplicated declaration in let: " ^ id) *)
+										let (s, ty) = ty_exp first_env varenv exp in
+										let (pair, mty) = pattern_match mexp in
+										let eqs = (ty, mty) :: (eqs_of_subst s) in
+										let s' = unify eqs in
+										let pair' = List.map (fun (x, y) -> (x, subst_type s' y)) pair in
+										let tys' = List.map (fun (x, y) -> y) pair' in
+											extend_env first_env (tys @ tys', pair_to_env tyenv first_env s' pair') tl
 								| [] -> (tys, tyenv))	
 						in
 							ty_line tl (extend_env tyenv (tys, tyenv) decl)

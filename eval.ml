@@ -54,6 +54,22 @@ let apply_prim op arg1 arg2 = match op, arg1, arg2 with
   | Cons, l, ListV r -> ListV (l :: r)
   | _ -> err ("Invalid expression: binOp")
 
+let rec pattern_match mexp v = 
+	(match (mexp, v) with
+			TupleExp mlist, TupleV vlist ->
+				let rec tuple_match = function
+						mexp' :: m_tl, v' :: v_tl ->
+							(pattern_match mexp' v') @ (tuple_match (m_tl, v_tl))
+					| [], [] -> []
+					| _ -> err ("Matching failed")
+				in tuple_match (mlist, vlist)
+		| Var id, _ -> [(id, v)]
+		| _ -> err ("Matching failed"))
+
+let rec pair_to_env env = function
+		(id, v) :: tl -> Environment.extend id v (pair_to_env env tl)
+	| [] -> env
+
 let rec eval_exp env = function
     Var x -> 
       (try Environment.lookup x env with 
@@ -73,9 +89,10 @@ let rec eval_exp env = function
 	| LetExp (decl, exp) ->
 			let rec extend_env first_env env decl =
 				(match decl with
-						(id, exp) :: tl ->
+						(mexp, exp) :: tl ->
 							let v = eval_exp first_env exp in 
-								extend_env first_env (Environment.extend id v env) tl
+							let pair = pattern_match mexp v in
+								extend_env first_env (pair_to_env env pair) tl
 					| [] -> env)	
 			in
 				eval_exp (extend_env env env decl) exp
@@ -159,9 +176,10 @@ let eval_decl env = function
   			decl :: tl ->
 					let rec extend_env first_env (eqs, env) decl =
 						(match decl with
-								(id, exp) :: tl ->
+								(mexp, exp) :: tl ->
 									let v = eval_exp first_env exp in 
-										extend_env first_env (eqs @ [(id, v)], (Environment.extend id v env)) tl
+									let pair = pattern_match mexp v in
+										extend_env first_env (eqs @ pair, (pair_to_env env pair)) tl
 							| [] -> (eqs, env))	
 					in
 						eval_line tl (extend_env env (eqs, env) decl)

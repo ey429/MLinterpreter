@@ -46,6 +46,14 @@ FunExpr :
 MulID :
 		x=ID m=MulID { x :: m }
 	| x=ID { [x] }
+
+ArgMatchExpr :
+		LPAREN t=TupleMatchExpr RPAREN { TupleExp t }
+	| x=ID { Var x }
+
+TupleMatchExpr :
+		e=ArgMatchExpr COMMA l=TupleMatchExpr { e :: l }
+	| e=ArgMatchExpr { [e] }
   
 LetExpr :
 		LET d=DeclExpr IN e=Expr { LetExp (d, e) }
@@ -64,8 +72,8 @@ DeclExpr :
 	| u=UnitDeclExpr { [u] }
 	
 UnitDeclExpr :
-		x=ID EQ e=Expr { (x, e) }
-	| f=ID p=MulID EQ e=Expr { (f, FunExp (p, e)) }
+		m=ArgMatchExpr EQ e=Expr { (m, e) }
+	| f=ID p=MulID EQ e=Expr { (Var f, FunExp (p, e)) }
 	
 MatchExpr :
 		MATCH e1=Expr WITH LSQPAREN RSQPAREN RARROW e2=Expr VERT x1=ID CONS x2=ID RARROW e3=Expr { MatchExp (e1, e2, e3, x1, x2) } 
