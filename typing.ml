@@ -22,45 +22,49 @@ let rec freevar_ty = function
 	| TyTuple tys -> MySet.bigunion (MySet.from_list (List.map freevar_ty tys))
 	| _ -> MySet.empty
 	
-let rec string_of_ty free = function
-		TyInt -> ("int", free)
-	| TyBool -> ("bool", free)
-	| TyVar i ->
-			let free' = 
-				if MySet.member i free then free
-				else MySet.insert i free
-			in
-			let id = (MySet.index i free') in
-			let num_str = if id >= 26 then string_of_int (id / 26) else "" in 
-				("'" ^ (String.make 1 (char_of_int (97 + (id mod 26))) ^ num_str), free')
-	| TyFun (ty1, ty2) -> 
-			let s1, free' = string_of_ty free ty1 in
-			let s2, free'' = string_of_ty free' ty2 in 
-				((match ty1 with
-						TyFun _ -> "(" ^ s1 ^ ")"
-					| _ -> s1) ^ " -> " ^ s2, free'')
-	| TyList ty -> 
-			let s, free' = string_of_ty free ty in
-				(s ^ " list", free')
-	| TyVariant s -> (s, free)
-	| TyTuple tys ->
-			let cover s = function
-					TyFun _ | TyTuple _ -> "(" ^ s ^ ")"
-				| _ -> s
-			in
-			let rec string_of_tuple s free = function
-					hd :: md :: tl ->
-						let s', free' = string_of_ty free hd in
-							string_of_tuple (s ^ (cover s' hd) ^ " * ") free' (md :: tl)
-				| [x] ->
-						let s', free' = string_of_ty free x in (s ^ (cover s' x), free')
-				| [] -> (s, free)
-			in string_of_tuple "" free tys
-	| _ -> ("-", free)
+let string_of_ty ty = 
+	let rec string_of_ty free = function
+			TyInt -> ("int", free)
+		| TyBool -> ("bool", free)
+		| TyVar i ->
+				let free' = 
+					if MySet.member i free then free
+					else MySet.insert i free
+				in
+				let id = (MySet.index i free') in
+				let num_str = if id >= 26 then string_of_int (id / 26) else "" in 
+					("'" ^ (String.make 1 (char_of_int (97 + (id mod 26))) ^ num_str), free')
+		| TyFun (ty1, ty2) -> 
+				let s1, free' = string_of_ty free ty1 in
+				let s2, free'' = string_of_ty free' ty2 in 
+					((match ty1 with
+							TyFun _ -> "(" ^ s1 ^ ")"
+						| _ -> s1) ^ " -> " ^ s2, free'')
+		| TyList ty -> 
+				let s, free' = string_of_ty free ty in
+					(s ^ " list", free')
+		| TyVariant s -> (s, free)
+		| TyTuple tys ->
+				let cover s = function
+						TyFun _ | TyTuple _ -> "(" ^ s ^ ")"
+					| _ -> s
+				in
+				let rec string_of_tuple s free = function
+						hd :: md :: tl ->
+							let s', free' = string_of_ty free hd in
+								string_of_tuple (s ^ (cover s' hd) ^ " * ") free' (md :: tl)
+					| [x] ->
+							let s', free' = string_of_ty free x in (s ^ (cover s' x), free')
+					| [] -> (s, free)
+				in string_of_tuple "" free tys
+		| _ -> ("-", free)
+	in
+	let (s, free) = string_of_ty MySet.empty ty in s
+
+let type_err ty1 ty2 = raise (Error ("Type error: type " ^ (string_of_ty ty2) ^ " is expected, got type " ^ (string_of_ty ty1)))
 
 let pp_ty ty = 
-	let s, _ = string_of_ty MySet.empty ty in
-	print_string s
+	print_string (string_of_ty ty)
 
 type subst = (tyvar * ty) list
 
@@ -99,21 +103,21 @@ let rec unify = function
 					  	unify ((ty1', ty2') :: tl)
 					| TyVariant s1, TyVariant s2 ->
 							if s1 = s2 then unify tl
-							else err ("Type error")
+							else type_err ty1 ty2 
 					| TyTuple tys1, TyTuple tys2 ->
 							let rec add_eq eqs = function
 									ty1' :: tl1, ty2' :: tl2 ->
 										add_eq ((ty1', ty2') :: eqs) (tl1, tl2)
 								| [], [] -> eqs
-								| _ -> err ("Type error")
+								| _ -> type_err ty1 ty2
 							in
 							let eqs = add_eq tl (tys1, tys2) in
 								unify eqs	
 					| TyVar tyvar, ty | ty, TyVar tyvar -> 
 							let free = freevar_ty ty in
-								if MySet.member tyvar free then err ("Type error")
+								if MySet.member tyvar free then err ("Type error: Typing failed")
 								else (tyvar, ty) :: unify (replace_eqs (tyvar, ty) tl)
-					| _ -> err ("Type error"))
+					| _ -> type_err ty1 ty2)
 	|	[] -> []
 
 let rec freevar_tysc scheme =
@@ -185,7 +189,12 @@ let rec pattern_match varenv = function
 let rec pair_to_env tyenv first_env s = function
 		(id, ty) :: tl -> Environment.extend id (closure ty first_env s) (pair_to_env tyenv first_env s tl)
 	| [] -> tyenv
-	
+
+let check_conflicts pair =
+	let dupl = exists_dupl pair in
+	if not (dupl = "") then err ("Variable " ^ dupl ^ " appears several times")
+	else ()
+
 let rec eval_texp tylenv = function
 		TupleT tlist ->
 			TyTuple (List.map (eval_texp tylenv) tlist)
@@ -221,7 +230,6 @@ let rec ty_exp tyenv varenv = function
 			let rec extend_env first_env (eqs, tyenv) decl =
 				(match decl with
 						(mexp, exp) :: tl -> 
-(*							if exists_var id tl then err ("Duplicated declaration in let: " ^ id) *)
 							let (s, ty) = ty_exp first_env varenv exp in
 							let (pair, sub_eqs, mty) = pattern_match varenv mexp in
 							let eqs' = (ty, mty) :: sub_eqs @ (eqs_of_subst s) in
@@ -237,13 +245,11 @@ let rec ty_exp tyenv varenv = function
 	| LetRecExp (funcs, exp) ->
 			let rec extend_env = function
 					(id, _, _) :: f_tl ->
-						if exists_var_letrec id f_tl then err ("Duplicated declaration in let: " ^ id)
-						else 
-							let arg_ty = fresh_tyvar () in
-							let body_ty = fresh_tyvar () in
-							let tyfun = TyFun (arg_ty, body_ty) in
-							let tyfuns, tyenv' = extend_env f_tl in
-								(tyfun :: tyfuns, Environment.extend id (tysc_of_ty tyfun) tyenv')
+						let arg_ty = fresh_tyvar () in
+						let body_ty = fresh_tyvar () in
+						let tyfun = TyFun (arg_ty, body_ty) in
+						let tyfuns, tyenv' = extend_env f_tl in
+							(tyfun :: tyfuns, Environment.extend id (tysc_of_ty tyfun) tyenv')
 				| [] -> ([], tyenv)
 			in
 			let tyfuns, tyenv' = extend_env funcs in
@@ -316,7 +322,7 @@ let rec ty_exp tyenv varenv = function
 				(try Environment.lookup id varenv
      			with Environment.Not_bound -> err ("Constructor not bound: " ^ id)) in
 			let (s1, ty1) = ty_exp tyenv varenv exp in
-			let eqs = (ty, ty1) :: (eqs_of_subst s1) in
+			let eqs = (ty1, ty) :: (eqs_of_subst s1) in
 			let s = unify eqs in (s, TyVariant varname)
 	| TupleExp explist -> 
 			let rec ty_tuple = function
@@ -341,7 +347,6 @@ let ty_decl tyenv varenv tylenv = function
 						let rec extend_env first_env (tys, tyenv) decl =
 							(match decl with
 									(mexp, exp) :: tl -> 
-			(*							if exists_var id tl then err ("Duplicated declaration in let: " ^ id) *)
 										let (s, ty) = ty_exp first_env varenv exp in
 										let (pair, sub_eqs, mty) = pattern_match varenv mexp in
 										let eqs = (ty, mty) :: sub_eqs @ (eqs_of_subst s) in
@@ -357,13 +362,11 @@ let ty_decl tyenv varenv tylenv = function
 	| RecDecl funcs -> 			
 			let rec extend_env = function
 					(id, _, _) :: f_tl ->
-						if exists_var_letrec id f_tl then err ("Duplicated declaration in let: " ^ id)
-						else 
-							let arg_ty = fresh_tyvar () in
-							let body_ty = fresh_tyvar () in
-							let tyfun = TyFun (arg_ty, body_ty) in
-							let tyfuns, tyenv' = extend_env f_tl in
-								(tyfun :: tyfuns, Environment.extend id (tysc_of_ty tyfun) tyenv')
+						let arg_ty = fresh_tyvar () in
+						let body_ty = fresh_tyvar () in
+						let tyfun = TyFun (arg_ty, body_ty) in
+						let tyfuns, tyenv' = extend_env f_tl in
+							(tyfun :: tyfuns, Environment.extend id (tysc_of_ty tyfun) tyenv')
 				| [] -> ([], tyenv)
 			in
 			let tyfuns, tyenv' = extend_env funcs in

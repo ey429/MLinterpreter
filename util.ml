@@ -3,10 +3,12 @@ let rec exists_var x = function
 		(id, v) :: tl -> (x = id) || (exists_var x tl)
 	|	[] -> false
 
-let rec exists_var_letrec x = function
-		(id, _, _) :: tl -> (x = id) || (exists_var_letrec x tl)
-	| [] -> false
-		
+let rec exists_dupl = function
+		(id, _) :: tl ->
+			if exists_var id tl then id
+			else exists_dupl tl
+	| [] -> ""
+
 let rec print_ids = function
 		id :: tl ->
 			print_string (id ^ " ");

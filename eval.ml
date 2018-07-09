@@ -18,6 +18,7 @@ type exval =
 and dnval = exval
 
 exception Error of string
+exception MatchError
 
 let err s = raise (Error s)
 
@@ -66,29 +67,34 @@ let rec pattern_match mexp v =
 						mexp' :: m_tl, v' :: v_tl ->
 							(pattern_match mexp' v') @ (tuple_match (m_tl, v_tl))
 					| [], [] -> []
-					| _ -> err ("Matching failed")
+					| _ -> raise MatchError
 				in tuple_match (mlist, vlist)
 		| BinOp (Cons, l, r), ListV lst ->
 				(match lst with
 						hd :: tl -> 
 							(pattern_match l hd) @ (pattern_match r (ListV tl))
-					| [] -> err ("Matching failed"))
+					| [] -> raise MatchError)
 		| ListExp mlist, ListV lst ->
 				(match (mlist, lst) with
 						mexp' :: m_tl, hd :: tl ->
 							(pattern_match mexp' hd) @ (pattern_match (ListExp m_tl) (ListV tl))
 					| [], [] -> []
-					| _ -> err ("Matching failed"))
+					| _ -> raise MatchError)
 		| ConstrExp (mid, mexp'), VariantV (id, v') ->
 				if mid = id then pattern_match mexp' v'
-				else err ("Matching failed")
+				else raise MatchError
 		| Var id, _ -> [(id, v)]
 		| None, _ -> []
-		| _ -> err ("Matching failed"))
+		| _ -> raise MatchError)
 
 let rec pair_to_env env = function
 		(id, v) :: tl -> Environment.extend id v (pair_to_env env tl)
 	| [] -> env
+	
+let check_conflicts pair =
+	let dupl = exists_dupl pair in
+	if not (dupl = "") then err ("Variable " ^ dupl ^ " appears several times")
+	else ()
 
 let rec eval_exp env = function
     Var x -> 
@@ -107,16 +113,17 @@ let rec eval_exp env = function
           | BoolV false -> eval_exp env exp3
           | _ -> err ("Test expression must be boolean: if"))
 	| LetExp (decl, exp) ->
-			let rec extend_env first_env env decl =
+			let rec extend_env first_env (eqs, env) decl =
 				(match decl with
 						(mexp, exp) :: tl ->
 							let v = eval_exp first_env exp in 
 							let pair = pattern_match mexp v in
-								extend_env first_env (pair_to_env env pair) tl
-					| [] -> env)	
-			in
-				eval_exp (extend_env env env decl) exp
+								extend_env first_env (eqs @ pair, (pair_to_env env pair)) tl
+					| [] -> check_conflicts eqs; env)
+			in eval_exp (extend_env env ([], env) decl) exp
 	| LetRecExp (funcs, exp) ->
+			let pair = List.map (fun (id, v, _) -> (id, v)) funcs in
+			check_conflicts pair;
 			let rec extend_env = function
 					(id, paras, e) :: f_tl ->
 				 		(match paras with
@@ -127,7 +134,7 @@ let rec eval_exp env = function
 					 					(dummyenv :: dummyenvs, Environment.extend id v newenv)
 							| [] -> err ("Function has no argument: " ^ id))
 				| [] -> ([], env)
-			in 
+			in
 			let dummyenvs, newenv = extend_env funcs in
 			let rec insert_env = function
 					dummyenv :: rest -> 
@@ -148,13 +155,13 @@ let rec eval_exp env = function
 					(mexp, body) :: tl ->
 						(try
 							let pair = pattern_match mexp v in
-								eval_exp (pair_to_env env pair) body
+								check_conflicts pair; eval_exp (pair_to_env env pair) body
 						with
-								_ -> match_case v tl)
-				| [] -> err ("Matching failed: match eval")
+								MatchError -> match_case v tl
+							| er -> raise er)
+				| [] -> err ("Matching failed: match")
 			in
-			let v = eval_exp env exp in
-				match_case v cases
+			let v = eval_exp env exp in match_case v cases
 	| ListExp explist -> 
 			let rec eval_explist explist =
 				(match explist with
@@ -202,12 +209,15 @@ let eval_decl env = function
 									let v = eval_exp first_env exp in 
 									let pair = pattern_match mexp v in
 										extend_env first_env (eqs @ pair, (pair_to_env env pair)) tl
-							| [] -> (eqs, env))	
+							| [] -> check_conflicts eqs; (eqs, env))
 					in
-						eval_line tl (extend_env env (eqs, env) decl)
+					let (eqs', env') = extend_env env ([], env) decl in
+						eval_line tl (eqs @ eqs', env') 
 				|	[] -> (eqs, env)
 			in eval_line decls ([], env)
-  | RecDecl funcs ->
+	| RecDecl funcs ->
+			let pair = List.map (fun (id, v, _) -> (id, v)) funcs in
+			check_conflicts pair;
 			let rec extend_env = function
 					(id, paras, e) :: f_tl ->
 				 		(match paras with
@@ -218,7 +228,7 @@ let eval_decl env = function
 					 					((id, v) :: eqs, dummyenv :: dummyenvs, Environment.extend id v newenv)
 							| [] -> err ("Function has no argument: " ^ id))
 				| [] -> ([], [], env)
-			in 
+			in
 			let eqs, dummyenvs, newenv = extend_env funcs in
 			let rec insert_env = function
 					dummyenv :: rest -> 
