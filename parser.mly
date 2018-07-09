@@ -13,6 +13,7 @@ open Syntax
 %token TYPE OF
 %token COMMA
 %token LIST
+%token UNDERBAR
 
 %token <int> INTV
 %token <Syntax.id> ID
@@ -50,10 +51,21 @@ MulID :
 
 ArgMatchExpr :
 		LPAREN t=TupleMatchExpr RPAREN { TupleExp t }
+	| l=ArgMatchExpr CONS r=ConsMatchExpr { BinOp (Cons, l, r) }
+	| LSQPAREN e=ListMatchExpr RSQPAREN { ListExp e }
 	| x=ID { Var x }
+  | UNDERBAR { None }
 
 TupleMatchExpr :
 		e=ArgMatchExpr COMMA l=TupleMatchExpr { e :: l }
+	| e=ArgMatchExpr { [e] }
+	
+ConsMatchExpr :
+		l=ArgMatchExpr CONS r=ConsMatchExpr { BinOp (Cons, l, r) }
+	| e=ArgMatchExpr { e }
+
+ListMatchExpr :
+		l=ArgMatchExpr SEMI r=ListMatchExpr { l :: r }
 	| e=ArgMatchExpr { [e] }
   
 LetExpr :

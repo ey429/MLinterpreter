@@ -4,6 +4,7 @@
 type token = 
   | WITH
   | VERT
+  | UNDERBAR
   | TYPE
   | TRUE
   | THEN

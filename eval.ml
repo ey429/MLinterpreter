@@ -68,7 +68,19 @@ let rec pattern_match mexp v =
 					| [], [] -> []
 					| _ -> err ("Matching failed")
 				in tuple_match (mlist, vlist)
+		| BinOp (Cons, l, r), ListV lst ->
+				(match lst with
+						hd :: tl -> 
+							(pattern_match l hd) @ (pattern_match r (ListV tl))
+					| [] -> err ("Matching failed"))
+		| ListExp mlist, ListV lst ->
+				(match (mlist, lst) with
+						mexp' :: m_tl, hd :: tl ->
+							(pattern_match mexp' hd) @ (pattern_match (ListExp m_tl) (ListV tl))
+					| [], [] -> []
+					| _ -> err ("Matching failed"))
 		| Var id, _ -> [(id, v)]
+		| None, _ -> []
 		| _ -> err ("Matching failed"))
 
 let rec pair_to_env env = function
