@@ -20,7 +20,7 @@ type exp =
   | LetExp of ((exp * exp) list) * exp
   | FunExp of (id list) * exp
   | DFunExp of (id list) * exp
-  | MatchExp of exp * exp * exp * id * id
+  | MatchExp of exp * ((exp * exp) list)
   | ListExp of exp list
   | AppExp of exp * exp
   | LetRecExp of ((id * (id list) * exp) list) * exp

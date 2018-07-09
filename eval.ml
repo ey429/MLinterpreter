@@ -79,6 +79,9 @@ let rec pattern_match mexp v =
 							(pattern_match mexp' hd) @ (pattern_match (ListExp m_tl) (ListV tl))
 					| [], [] -> []
 					| _ -> err ("Matching failed"))
+		| ConstrExp (mid, mexp'), VariantV (id, v') ->
+				if mid = id then pattern_match mexp' v'
+				else err ("Matching failed")
 		| Var id, _ -> [(id, v)]
 		| None, _ -> []
 		| _ -> err ("Matching failed"))
@@ -140,17 +143,18 @@ let rec eval_exp env = function
 			(match ids with
 					id :: tl -> DProcV (id, DFunExp (tl, exp))
 				| [] -> eval_exp env exp)
-	| MatchExp (exp1, exp2, exp3, x1, x2) ->
-			if x1 = x2 then err ("Variable name is duplicated : match")
-			else
-				let v1 = eval_exp env exp1 in
-				let v2 = eval_exp env exp2 in
-					(match v1 with
-							ListV [] -> v2
-						| ListV (hd :: tl) -> 
-								let newenv = Environment.extend x1 hd (Environment.extend x2 (ListV tl) env) in
-									eval_exp newenv exp3
-						| _ -> err ("First argument must be type of list : match"))
+	| MatchExp (exp, cases) ->
+			let rec match_case v = function
+					(mexp, body) :: tl ->
+						(try
+							let pair = pattern_match mexp v in
+								eval_exp (pair_to_env env pair) body
+						with
+								_ -> match_case v tl)
+				| [] -> err ("Matching failed: match eval")
+			in
+			let v = eval_exp env exp in
+				match_case v cases
 	| ListExp explist -> 
 			let rec eval_explist explist =
 				(match explist with

@@ -1,5 +1,37 @@
 
-** Conflict (reduce/reduce) in state 143.
+** Conflict (shift/reduce) in state 152.
+** Token involved: VERT
+** This state is reached from toplevel after reading:
+
+MATCH Expr WITH ArgMatchExpr RARROW MATCH Expr WITH ArgMatchExpr RARROW Expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+toplevel 
+Expr SEMISEMI 
+MatchExpr 
+MATCH Expr WITH CaseExpr 
+                (?)
+
+** In state 152, looking ahead at VERT, shifting is permitted
+** because of the following sub-derivation:
+
+ArgMatchExpr RARROW Expr VERT CaseExpr 
+                    MatchExpr 
+                    MATCH Expr WITH CaseExpr 
+                                    ArgMatchExpr RARROW Expr . VERT CaseExpr 
+
+** In state 152, looking ahead at VERT, reducing production
+** CaseExpr -> ArgMatchExpr RARROW Expr 
+** is permitted because of the following sub-derivation:
+
+ArgMatchExpr RARROW Expr VERT CaseExpr // lookahead token appears
+                    MatchExpr // lookahead token is inherited
+                    MATCH Expr WITH CaseExpr // lookahead token is inherited
+                                    ArgMatchExpr RARROW Expr . 
+
+** Conflict (reduce/reduce) in state 145.
 ** Token involved: RSQPAREN
 ** This state is reached from toplevel after reading:
 
@@ -21,20 +53,20 @@ AExpr
 LSQPAREN ListExpr RSQPAREN // lookahead token appears
          (?)
 
-** In state 143, looking ahead at RSQPAREN, reducing production
+** In state 145, looking ahead at RSQPAREN, reducing production
 ** ListExpr -> Expr SEMI 
 ** is permitted because of the following sub-derivation:
 
 Expr SEMI . 
 
-** In state 143, looking ahead at RSQPAREN, reducing production
+** In state 145, looking ahead at RSQPAREN, reducing production
 ** ListExpr -> 
 ** is permitted because of the following sub-derivation:
 
 Expr SEMI ListExpr // lookahead token is inherited
           . 
 
-** Conflict (shift/reduce) in state 135.
+** Conflict (shift/reduce) in state 137.
 ** Token involved: RPAREN
 ** This state is reached from toplevel after reading:
 
@@ -55,20 +87,20 @@ AppExpr
 AExpr 
 (?)
 
-** In state 135, looking ahead at RPAREN, shifting is permitted
+** In state 137, looking ahead at RPAREN, shifting is permitted
 ** because of the following sub-derivation:
 
 LPAREN Expr . RPAREN 
 
-** In state 135, looking ahead at RPAREN, reducing production
+** In state 137, looking ahead at RPAREN, reducing production
 ** TupleExpr -> Expr 
 ** is permitted because of the following sub-derivation:
 
 LPAREN TupleExpr RPAREN // lookahead token appears
        Expr . 
 
-** Conflict (reduce/reduce) in state 112.
-** Tokens involved: SEMI RSQPAREN RPAREN EQ CONS COMMA
+** Conflict (reduce/reduce) in state 111.
+** Tokens involved: SEMI RSQPAREN RPAREN RARROW EQ CONS COMMA
 ** The following explanations concentrate on token EQ.
 ** This state is reached from toplevel after reading:
 
@@ -85,20 +117,20 @@ LET DeclExpr MulLET
     ArgMatchExpr CONS ConsMatchExpr // lookahead token is inherited
                       (?)
 
-** In state 112, looking ahead at EQ, reducing production
+** In state 111, looking ahead at EQ, reducing production
 ** ArgMatchExpr -> ArgMatchExpr CONS ConsMatchExpr 
 ** is permitted because of the following sub-derivation:
 
 ArgMatchExpr // lookahead token is inherited
 ArgMatchExpr CONS ConsMatchExpr . 
 
-** In state 112, looking ahead at EQ, reducing production
+** In state 111, looking ahead at EQ, reducing production
 ** ConsMatchExpr -> ArgMatchExpr CONS ConsMatchExpr 
 ** is permitted because of the following sub-derivation:
 
 ArgMatchExpr CONS ConsMatchExpr . 
 
-** Conflict (shift/reduce) in state 110.
+** Conflict (shift/reduce) in state 109.
 ** Token involved: CONS
 ** This state is reached from toplevel after reading:
 
@@ -114,20 +146,49 @@ LET DeclExpr MulLET
     ArgMatchExpr EQ Expr 
     (?)
 
-** In state 110, looking ahead at CONS, shifting is permitted
+** In state 109, looking ahead at CONS, shifting is permitted
 ** because of the following sub-derivation:
 
 ArgMatchExpr CONS ConsMatchExpr 
                   ArgMatchExpr CONS ConsMatchExpr 
                   ArgMatchExpr . CONS ConsMatchExpr 
 
-** In state 110, looking ahead at CONS, reducing production
+** In state 109, looking ahead at CONS, reducing production
 ** ConsMatchExpr -> ArgMatchExpr 
 ** is permitted because of the following sub-derivation:
 
 ArgMatchExpr CONS ConsMatchExpr // lookahead token appears
 ArgMatchExpr CONS ConsMatchExpr // lookahead token is inherited
                   ArgMatchExpr . 
+
+** Conflict (shift/reduce) in state 106.
+** Token involved: CONS
+** This state is reached from toplevel after reading:
+
+LET CONSTR ArgMatchExpr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+toplevel 
+MulLET SEMISEMI 
+LET DeclExpr MulLET 
+    UnitDeclExpr AND DeclExpr 
+    ArgMatchExpr EQ Expr 
+    (?)
+
+** In state 106, looking ahead at CONS, shifting is permitted
+** because of the following sub-derivation:
+
+CONSTR ArgMatchExpr 
+       ArgMatchExpr . CONS ConsMatchExpr 
+
+** In state 106, looking ahead at CONS, reducing production
+** ArgMatchExpr -> CONSTR ArgMatchExpr 
+** is permitted because of the following sub-derivation:
+
+ArgMatchExpr CONS ConsMatchExpr // lookahead token appears
+CONSTR ArgMatchExpr . 
 
 ** Conflict (shift/reduce) in state 78.
 ** Token involved: AAND

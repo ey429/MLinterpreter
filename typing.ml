@@ -146,11 +146,11 @@ let ty_prim op ty1 ty2 = match op with
   | Or -> ([(ty1, TyBool); (ty2, TyBool)], TyBool)
   | Cons -> ([(TyList ty1, ty2)], TyList ty1)
 
-let rec pattern_match = function
+let rec pattern_match varenv = function
 		TupleExp mlist ->
 			let rec read_tuple = function
 					mexp' :: m_tl ->
-						let (pair1, eqs1, ty) = pattern_match mexp' in
+						let (pair1, eqs1, ty) = pattern_match varenv mexp' in
 						let (pair2, eqs2, tylist) = read_tuple m_tl in
 							(pair1 @ pair2, eqs1 @ eqs2, ty :: tylist)
 				| [] -> ([], [], [])
@@ -158,17 +158,23 @@ let rec pattern_match = function
 			let (pair, eqs, tylist) = read_tuple mlist in
 				(pair, eqs, TyTuple tylist)
 	| BinOp (Cons, l, r) ->
-			let (pair1, eqs1, ty1) = pattern_match l in
-			let (pair2, eqs2, ty2) = pattern_match r in
+			let (pair1, eqs1, ty1) = pattern_match varenv l in
+			let (pair2, eqs2, ty2) = pattern_match varenv r in
 				(pair1 @ pair2, (TyList ty1, ty2) :: eqs1 @ eqs2, ty2)
 	| ListExp mlist ->
 			let rec read_list = function
 					mexp' :: m_tl ->
-						let (pair1, eqs1, ty1) = pattern_match mexp' in
+						let (pair1, eqs1, ty1) = pattern_match varenv mexp' in
 						let (pair2, eqs2, ty2) = read_list m_tl in
 							(pair1 @ pair2, (TyList ty1, ty2) :: eqs1 @ eqs2, ty2)
 				| [] ->	let alpha = fresh_tyvar () in ([], [], TyList alpha)
 			in read_list mlist
+	| ConstrExp (id, mexp') ->
+			let (varname, ty) = 
+				(try Environment.lookup id varenv
+     			with Environment.Not_bound -> err ("Constructor not bound: " ^ id)) in
+     	let (pair, eqs, ty') = pattern_match varenv mexp' in
+     		(pair, (ty, ty') :: eqs, TyVariant varname)
 	| Var id ->
 			let alpha = fresh_tyvar () in
 				([(id, alpha)], [], alpha)
@@ -217,7 +223,7 @@ let rec ty_exp tyenv varenv = function
 						(mexp, exp) :: tl -> 
 (*							if exists_var id tl then err ("Duplicated declaration in let: " ^ id) *)
 							let (s, ty) = ty_exp first_env varenv exp in
-							let (pair, sub_eqs, mty) = pattern_match mexp in
+							let (pair, sub_eqs, mty) = pattern_match varenv mexp in
 							let eqs' = (ty, mty) :: sub_eqs @ (eqs_of_subst s) in
 							let s' = unify eqs' in
 							let pair' = List.map (fun (x, y) -> (x, subst_type s' y)) pair in
@@ -273,14 +279,21 @@ let rec ty_exp tyenv varenv = function
 						let (s, body_ty) = ty_exp (Environment.extend id (tysc_of_ty arg_ty) tyenv) varenv (FunExp (tl, exp)) in
 							(s, TyFun (subst_type s arg_ty, body_ty))
 				| [] -> ty_exp tyenv varenv exp)
-	| MatchExp (exp1, exp2, exp3, x1, x2) ->
+	| MatchExp (exp, cases) ->
 			let alpha = fresh_tyvar () in
-			let (s1, ty1) = ty_exp tyenv varenv exp1 in
-			let (s2, ty2) = ty_exp tyenv varenv exp2 in
-			let tyenv' = Environment.extend x1 (tysc_of_ty alpha) (Environment.extend x2 (tysc_of_ty (TyList alpha)) tyenv) in
-			let (s3, ty3) = ty_exp tyenv' varenv exp3 in
-			let eqs = (ty1, TyList alpha) :: (ty2, ty3) :: (eqs_of_subst s1) @ (eqs_of_subst s2) @ (eqs_of_subst s3) in
-			let s = unify eqs in (s, subst_type s ty2)
+			let rec match_case (s, ty) = function
+					(mexp, body) :: tl ->
+						let (pair, sub_eqs, mty) = pattern_match varenv mexp in
+						let eqs' = (ty, mty) :: sub_eqs @ (eqs_of_subst s) in
+						let s' = unify eqs' in
+						let pair' = List.map (fun (x, y) -> (x, subst_type s' y)) pair in
+						let (s_body, ty_body) = ty_exp (pair_to_env tyenv tyenv s' pair') varenv body in
+							(ty_body, alpha) :: (eqs_of_subst s_body) @ (match_case (s, ty) tl)
+				| [] -> []
+			in
+			let (s, ty) = ty_exp tyenv varenv exp in
+			let eqs = match_case (s, ty) cases in
+			let s' = unify eqs in (s', subst_type s' alpha)
 	| ListExp explist -> 
 			let alpha = fresh_tyvar () in
 			let rec ty_list eqs = function
@@ -330,7 +343,7 @@ let ty_decl tyenv varenv tylenv = function
 									(mexp, exp) :: tl -> 
 			(*							if exists_var id tl then err ("Duplicated declaration in let: " ^ id) *)
 										let (s, ty) = ty_exp first_env varenv exp in
-										let (pair, sub_eqs, mty) = pattern_match mexp in
+										let (pair, sub_eqs, mty) = pattern_match varenv mexp in
 										let eqs = (ty, mty) :: sub_eqs @ (eqs_of_subst s) in
 										let s' = unify eqs in
 										let pair' = List.map (fun (x, y) -> (x, subst_type s' y)) pair in

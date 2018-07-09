@@ -53,6 +53,8 @@ ArgMatchExpr :
 		LPAREN t=TupleMatchExpr RPAREN { TupleExp t }
 	| l=ArgMatchExpr CONS r=ConsMatchExpr { BinOp (Cons, l, r) }
 	| LSQPAREN e=ListMatchExpr RSQPAREN { ListExp e }
+  | x=CONSTR e=ArgMatchExpr { ConstrExp (x, e) }
+  | x=CONSTR { ConstrExp (x, None) }
 	| x=ID { Var x }
   | UNDERBAR { None }
 
@@ -67,6 +69,7 @@ ConsMatchExpr :
 ListMatchExpr :
 		l=ArgMatchExpr SEMI r=ListMatchExpr { l :: r }
 	| e=ArgMatchExpr { [e] }
+	| { [] }
   
 LetExpr :
 		LET d=DeclExpr IN e=Expr { LetExp (d, e) }
@@ -89,7 +92,11 @@ UnitDeclExpr :
 	| f=ID p=MulID EQ e=Expr { (Var f, FunExp (p, e)) }
 	
 MatchExpr :
-		MATCH e1=Expr WITH LSQPAREN RSQPAREN RARROW e2=Expr VERT x1=ID CONS x2=ID RARROW e3=Expr { MatchExp (e1, e2, e3, x1, x2) } 
+		MATCH e=Expr WITH l=CaseExpr { MatchExp (e, l) }
+
+CaseExpr :
+		m=ArgMatchExpr RARROW e=Expr VERT l=CaseExpr { (m, e) :: l }
+	| m=ArgMatchExpr RARROW e=Expr { [(m, e)] }
 
 ConsExpr :
 		l=ORExpr CONS r=ConsExpr { BinOp (Cons, l, r) }
