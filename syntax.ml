@@ -12,7 +12,7 @@ type tysc = TyScheme of tyvar list * ty
 let tysc_of_ty ty = TyScheme ([], ty)
 
 type exp =
-  | Var of id
+    Var of id
   | ILit of int
   | BLit of bool
   | BinOp of binOp * exp * exp
@@ -26,10 +26,17 @@ type exp =
   | LetRecExp of ((id * (id list) * exp) list) * exp
   | ConstrExp of id * exp
   | TupleExp of exp list
+	| None
+
+type texp = 
+		TupleT of texp list
+	| ListT of texp
+	| TVar of string
+	| TNone
 
 type program = 
     Exp of exp
   | Decl of ((exp * exp) list) list
   | RecDecl of (id * (id list) * exp) list
- 	| TypeDecl of id * ((id * ty) list)
-
+ 	| TypeDecl of id * texp
+ 	| VariantDecl of id * ((id * texp) list)

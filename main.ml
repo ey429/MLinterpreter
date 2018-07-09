@@ -3,12 +3,12 @@ open Eval
 open Util
 open Typing
 
-let rec read_eval_print env tyenv varenv =
+let rec read_eval_print env tyenv varenv tylenv =
   print_string "# ";
   flush stdout;
  	try 
  	let decl = Parser.toplevel Lexer.main (Lexing.from_channel stdin) in
-	let (tys, newtyenv) = ty_decl tyenv varenv decl in
+	let (tys, newtyenv) = ty_decl tyenv varenv tylenv decl in
 	let (eqs, newenv) = eval_decl env decl in
 		let rec print_eqs tys eqs = 
 			(match (tys, eqs) with
@@ -20,21 +20,21 @@ let rec read_eval_print env tyenv varenv =
 							pp_val v;
 							print_newline());
 						print_eqs ty_tl eq_tl
-				| _ -> read_eval_print newenv newtyenv varenv)
+				| _ -> read_eval_print newenv newtyenv varenv tylenv)
 		in print_eqs tys eqs
 	with
-			Typing.TypeDeclare (s, newvarenv) ->
+			Typing.TypeDeclare (s, newvarenv, newtylenv) ->
 				print_string s;
 				print_newline();
-				read_eval_print env tyenv newvarenv
+				read_eval_print env tyenv newvarenv newtylenv
 		| Typing.Error s | Eval.Error s | Failure s ->
 				print_string (s);
 				print_newline();
-				read_eval_print env tyenv varenv
+				read_eval_print env tyenv varenv tylenv
 		|	Parser.Error ->
 				print_string ("Parser Error");
 				print_newline();
-				read_eval_print env tyenv varenv
+				read_eval_print env tyenv varenv tylenv
 
 let initial_tyenv =
 	Environment.extend "i" (tysc_of_ty TyInt)
@@ -54,7 +54,12 @@ let initial_env =
 
 let initial_varenv = Environment.empty
 
-let _ = read_eval_print initial_env initial_tyenv initial_varenv
+let initial_tylenv =
+	Environment.extend "" TyNone
+		(Environment.extend "int" TyInt
+			(Environment.extend "bool" TyBool Environment.empty))
+
+let _ = read_eval_print initial_env initial_tyenv initial_varenv initial_tylenv
 
 (*
 let rec read_eval_print env =

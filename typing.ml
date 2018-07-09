@@ -2,7 +2,7 @@ open Syntax
 open Util
 
 exception Error of string
-exception TypeDeclare of string * ((Syntax.id * Syntax.ty) Environment.t)
+exception TypeDeclare of string * ((Syntax.id * Syntax.ty) Environment.t) * (Syntax.ty Environment.t)
 
 let err s = raise (Error s)
 
@@ -92,7 +92,8 @@ let rec unify = function
 			if ty1 = ty2 then unify tl
 			else 
 				(match ty1, ty2 with
-						TyFun (ty11, ty12), TyFun(ty21, ty22) -> 
+						TyNone, _ | _, TyNone -> unify tl
+					|	TyFun (ty11, ty12), TyFun(ty21, ty22) -> 
 							unify ((ty11, ty21) :: (ty12, ty22) :: tl)
 					| TyList ty1', TyList ty2' -> 
 					  	unify ((ty1', ty2') :: tl)
@@ -164,9 +165,19 @@ let rec pattern_match = function
 let rec pair_to_env tyenv first_env s = function
 		(id, ty) :: tl -> Environment.extend id (closure ty first_env s) (pair_to_env tyenv first_env s tl)
 	| [] -> tyenv
-
+	
+let rec eval_texp tylenv = function
+		TupleT tlist ->
+			TyTuple (List.map (eval_texp tylenv) tlist)
+	| ListT t ->
+			TyList (eval_texp tylenv t)
+	| TVar x ->
+			(try Environment.lookup x tylenv
+			with Environment.Not_bound -> err ("Type not bound: " ^ x))		
+	| _ -> TyNone
+		
 let rec ty_exp tyenv varenv = function
-    Var x -> 
+		Var x -> 
       (try 
       	let TyScheme (vars, ty) = Environment.lookup x tyenv in
       	let s = List.map (fun id -> (id, fresh_tyvar ())) vars in 
@@ -292,7 +303,7 @@ let rec ty_exp tyenv varenv = function
 			let s = unify eqs in (s, subst_type s (TyTuple tys))
 	| _ -> ([], TyNone)
 
-let ty_decl tyenv varenv = function
+let ty_decl tyenv varenv tylenv = function
     Exp e ->
     	let (s, ty) = ty_exp tyenv varenv e in
     		([ty], tyenv)
@@ -353,11 +364,17 @@ let ty_decl tyenv varenv = function
 				| _, _ -> assert false
 			in
 				extend_env_sc funcs tyfuns
-	| TypeDecl (id, variant) ->
+	| TypeDecl (id, texp) ->
+			let tylenv' = Environment.extend id (eval_texp tylenv texp) tylenv in
+				raise (TypeDeclare (id, varenv, tylenv'))
+	| VariantDecl (id, variant) ->
+			let tylenv' = Environment.extend id (TyVariant id) tylenv in
 			let rec register_constr id firstenv = function
-					(constr, ty) :: tl -> Environment.extend constr (id, ty) (register_constr id firstenv tl)
+					(constr, texp) :: tl -> 
+						let ty = eval_texp tylenv' texp in
+							Environment.extend constr (id, ty) (register_constr id firstenv tl)
 				| [] -> firstenv
 			in
 			let newvarenv = register_constr id varenv variant in
-				raise (TypeDeclare (id, newvarenv))
+				raise (TypeDeclare (id, newvarenv, tylenv'))
 	| _ -> ([TyNone], tyenv)

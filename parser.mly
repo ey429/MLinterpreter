@@ -11,8 +11,8 @@ open Syntax
 %token LSQPAREN RSQPAREN SEMI CONS
 %token MATCH WITH VERT
 %token TYPE OF
-%token INT BOOL
 %token COMMA
+%token LIST
 
 %token <int> INTV
 %token <Syntax.id> ID
@@ -26,7 +26,8 @@ toplevel :
     e=Expr SEMISEMI { Exp e }
   | m=MulLET SEMISEMI { Decl m }
 	|	LET REC d=RecDeclExpr SEMISEMI { RecDecl d }
-	| TYPE x=ID EQ l=VariantExpr SEMISEMI { TypeDecl (x, l) }
+	| TYPE x=ID EQ t=TypeExpr SEMISEMI { TypeDecl (x, t) }
+	| TYPE x=ID EQ l=VariantExpr SEMISEMI { VariantDecl (x, l) }
 
 MulLET :
   | LET d=DeclExpr m=MulLET { d :: m }
@@ -123,6 +124,7 @@ AExpr :
   | LPAREN e=Expr RPAREN { e }
   | LSQPAREN e=ListExpr RSQPAREN { ListExp e }
   | x=CONSTR e=Expr { ConstrExp (x, e) }
+  | x=CONSTR { ConstrExp (x, None) }
   | LPAREN t=TupleExpr RPAREN { TupleExp t }
   
 ListExpr :
@@ -143,9 +145,18 @@ VariantExpr :
 	| c=ConstrExpr { [c] }
 
 ConstrExpr :
-		x=CONSTR { (x, TyNone) }
-	| x=CONSTR OF e=TypeExpr { (x, e) }
-
+		x=CONSTR { (x, TNone) }
+	| x=CONSTR OF t=TypeExpr { (x, t) }
+	
 TypeExpr :
-		INT { TyInt }
-	| BOOL { TyBool }	
+		e=TExpr MULT l=TypeTupleExpr { TupleT (e :: l) }
+	| t=TExpr LIST { ListT t }
+	| t=TExpr { t }
+
+TypeTupleExpr :
+		t=TExpr MULT l=TypeTupleExpr { t :: l }
+	| t=TExpr { [t] }
+		
+TExpr :
+		LPAREN t=TypeExpr RPAREN { t }
+	| x=ID { TVar x }

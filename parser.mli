@@ -22,9 +22,9 @@ type token =
   | LT
   | LSQPAREN
   | LPAREN
+  | LIST
   | LET
   | INTV of (int)
-  | INT
   | IN
   | IF
   | ID of (Syntax.id)
@@ -37,7 +37,6 @@ type token =
   | CONSTR of (Syntax.id)
   | CONS
   | COMMA
-  | BOOL
   | AND
   | AAND
 

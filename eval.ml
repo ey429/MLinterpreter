@@ -7,13 +7,14 @@ open Util
    の言語ではこの両者は同じになるが，この2つが異なる言語もある．教科書
    参照． *)
 type exval =
-  | IntV of int
+    IntV of int
   | BoolV of bool
   | ProcV of id * exp * dnval Environment.t ref
   | DProcV of id * exp
   | ListV of dnval list
   | VariantV of id * dnval
   | TupleV of dnval list
+	| Null
 and dnval = exval
 
 exception Error of string
@@ -32,13 +33,17 @@ let rec string_of_exval = function
 				| [x] -> string_of_exval x
 				| [] -> ""
 			in "[" ^ (string_of_list lst) ^ "]"
-	| VariantV (id, v) -> id ^ " " ^ (string_of_exval v)
+	| VariantV (id, v) -> 
+			if v = Null then id
+			else id ^ " " ^ (string_of_exval v)
 	| TupleV tuple ->
 			let rec string_of_tuple = function
 					hd :: md :: tl -> (string_of_exval hd) ^ ", " ^ (string_of_tuple (md :: tl))
 				| [x] -> string_of_exval x
 				| [] -> ""
 			in "(" ^ (string_of_tuple tuple) ^ ")"
+	| _ -> ""
+
 			
 let pp_val v = print_string (string_of_exval v)
 
@@ -168,6 +173,7 @@ let rec eval_exp env = function
 										else err ("Non-function value is applied")
 								| _ -> err ("Non-function value is applied")))
 *)
+	| _ -> Null
 
 let eval_decl env = function
     Exp e -> let v = eval_exp env e in ([("-", v)], env)

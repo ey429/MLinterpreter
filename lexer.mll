@@ -15,9 +15,8 @@ let reservedWords = [
   ("match", Parser.MATCH);
   ("with", Parser.WITH);
   ("type", Parser.TYPE);
-  ("int", Parser.INT);
-  ("bool", Parser.BOOL);
   ("of", Parser.OF);
+  ("list", Parser.LIST);
 ]
 }	
 

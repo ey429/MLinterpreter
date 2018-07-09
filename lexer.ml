@@ -16,12 +16,11 @@ let reservedWords = [
   ("match", Parser.MATCH);
   ("with", Parser.WITH);
   ("type", Parser.TYPE);
-  ("int", Parser.INT);
-  ("bool", Parser.BOOL);
   ("of", Parser.OF);
+  ("list", Parser.LIST);
 ]
 
-# 25 "lexer.ml"
+# 24 "lexer.ml"
 let __ocaml_lex_tables = {
   Lexing.lex_base = 
    "\000\000\232\255\084\000\112\000\235\255\005\000\239\255\240\255\
@@ -176,134 +175,134 @@ let rec main lexbuf =
 and __ocaml_lex_main_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 26 "lexer.mll"
+# 25 "lexer.mll"
                                 ( main lexbuf )
-# 182 "lexer.ml"
+# 181 "lexer.ml"
 
   | 1 ->
-# 28 "lexer.mll"
+# 27 "lexer.mll"
        ( comment lexbuf ; main lexbuf )
-# 187 "lexer.ml"
+# 186 "lexer.ml"
 
   | 2 ->
-# 31 "lexer.mll"
+# 30 "lexer.mll"
     ( Parser.INTV (int_of_string (Lexing.lexeme lexbuf)) )
-# 192 "lexer.ml"
+# 191 "lexer.ml"
 
   | 3 ->
-# 33 "lexer.mll"
+# 32 "lexer.mll"
       ( Parser.LPAREN )
-# 197 "lexer.ml"
+# 196 "lexer.ml"
 
   | 4 ->
-# 34 "lexer.mll"
+# 33 "lexer.mll"
       ( Parser.RPAREN )
-# 202 "lexer.ml"
+# 201 "lexer.ml"
 
   | 5 ->
-# 35 "lexer.mll"
+# 34 "lexer.mll"
        ( Parser.SEMISEMI )
-# 207 "lexer.ml"
+# 206 "lexer.ml"
 
   | 6 ->
-# 36 "lexer.mll"
+# 35 "lexer.mll"
       ( Parser.PLUS )
-# 212 "lexer.ml"
+# 211 "lexer.ml"
 
   | 7 ->
-# 37 "lexer.mll"
+# 36 "lexer.mll"
       ( Parser.MULT )
-# 217 "lexer.ml"
+# 216 "lexer.ml"
 
   | 8 ->
-# 38 "lexer.mll"
+# 37 "lexer.mll"
       ( Parser.LT )
-# 222 "lexer.ml"
+# 221 "lexer.ml"
 
   | 9 ->
-# 39 "lexer.mll"
+# 38 "lexer.mll"
       ( Parser.GT )
-# 227 "lexer.ml"
+# 226 "lexer.ml"
 
   | 10 ->
-# 40 "lexer.mll"
+# 39 "lexer.mll"
        ( Parser.AAND )
-# 232 "lexer.ml"
+# 231 "lexer.ml"
 
   | 11 ->
-# 41 "lexer.mll"
+# 40 "lexer.mll"
        ( Parser.OOR )
-# 237 "lexer.ml"
+# 236 "lexer.ml"
 
   | 12 ->
-# 42 "lexer.mll"
+# 41 "lexer.mll"
       ( Parser.EQ )
-# 242 "lexer.ml"
+# 241 "lexer.ml"
 
   | 13 ->
-# 43 "lexer.mll"
+# 42 "lexer.mll"
       ( Parser.MINUS )
-# 247 "lexer.ml"
+# 246 "lexer.ml"
 
   | 14 ->
-# 44 "lexer.mll"
+# 43 "lexer.mll"
        ( Parser.RARROW )
-# 252 "lexer.ml"
+# 251 "lexer.ml"
 
   | 15 ->
-# 45 "lexer.mll"
+# 44 "lexer.mll"
       ( Parser.LSQPAREN )
-# 257 "lexer.ml"
+# 256 "lexer.ml"
 
   | 16 ->
-# 46 "lexer.mll"
+# 45 "lexer.mll"
       ( Parser.RSQPAREN )
-# 262 "lexer.ml"
+# 261 "lexer.ml"
 
   | 17 ->
-# 47 "lexer.mll"
+# 46 "lexer.mll"
       ( Parser.SEMI )
-# 267 "lexer.ml"
+# 266 "lexer.ml"
 
   | 18 ->
-# 48 "lexer.mll"
+# 47 "lexer.mll"
        ( Parser.CONS )
-# 272 "lexer.ml"
+# 271 "lexer.ml"
 
   | 19 ->
-# 49 "lexer.mll"
+# 48 "lexer.mll"
       ( Parser.VERT )
-# 277 "lexer.ml"
+# 276 "lexer.ml"
 
   | 20 ->
-# 50 "lexer.mll"
+# 49 "lexer.mll"
       ( Parser.COMMA )
-# 282 "lexer.ml"
+# 281 "lexer.ml"
 
   | 21 ->
-# 53 "lexer.mll"
+# 52 "lexer.mll"
     ( let id = Lexing.lexeme lexbuf in
       try 
         List.assoc id reservedWords
       with
       _ -> Parser.ID id
      )
-# 292 "lexer.ml"
+# 291 "lexer.ml"
 
   | 22 ->
-# 60 "lexer.mll"
+# 59 "lexer.mll"
     ( let id = Lexing.lexeme lexbuf in
       try 
         List.assoc id reservedWords
       with
       _ -> Parser.CONSTR id
      )
-# 302 "lexer.ml"
+# 301 "lexer.ml"
 
   | 23 ->
-# 66 "lexer.mll"
+# 65 "lexer.mll"
       ( exit 0 )
-# 307 "lexer.ml"
+# 306 "lexer.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; 
       __ocaml_lex_main_rec lexbuf __ocaml_lex_state
@@ -313,24 +312,24 @@ and comment lexbuf =
 and __ocaml_lex_comment_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 69 "lexer.mll"
+# 68 "lexer.mll"
       ( comment lexbuf ; comment lexbuf )
-# 319 "lexer.ml"
+# 318 "lexer.ml"
 
   | 1 ->
-# 70 "lexer.mll"
+# 69 "lexer.mll"
        ( () )
-# 324 "lexer.ml"
+# 323 "lexer.ml"
 
   | 2 ->
-# 71 "lexer.mll"
+# 70 "lexer.mll"
       ( () )
-# 329 "lexer.ml"
+# 328 "lexer.ml"
 
   | 3 ->
-# 72 "lexer.mll"
+# 71 "lexer.mll"
     ( comment lexbuf )
-# 334 "lexer.ml"
+# 333 "lexer.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; 
       __ocaml_lex_comment_rec lexbuf __ocaml_lex_state
