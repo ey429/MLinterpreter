@@ -46,11 +46,14 @@ FunExpr :
 	| DFUN p=MulID RARROW e=Expr { DFunExp (p, e) }
 	
 MulID :
-		x=ID m=MulID { x :: m }
-	| x=ID { [x] }
+		x=ArgMatchExpr m=MulID { x :: m }
+	| x=ArgMatchExpr { [x] }
 
 ArgMatchExpr :
-		LPAREN t=TupleMatchExpr RPAREN { TupleExp t }
+    i=INTV { ILit i }
+  | TRUE   { BLit true }
+  | FALSE  { BLit false }
+	| LPAREN t=TupleMatchExpr RPAREN { TupleExp t }
 	| l=ArgMatchExpr CONS r=ConsMatchExpr { BinOp (Cons, l, r) }
 	| LSQPAREN e=ListMatchExpr RSQPAREN { ListExp e }
   | x=CONSTR e=ArgMatchExpr { ConstrExp (x, e) }

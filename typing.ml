@@ -150,44 +150,56 @@ let ty_prim op ty1 ty2 = match op with
   | Or -> ([(ty1, TyBool); (ty2, TyBool)], TyBool)
   | Cons -> ([(TyList ty1, ty2)], TyList ty1)
 
-let rec pattern_match varenv = function
-		TupleExp mlist ->
-			let rec read_tuple = function
-					mexp' :: m_tl ->
-						let (pair1, eqs1, ty) = pattern_match varenv mexp' in
-						let (pair2, eqs2, tylist) = read_tuple m_tl in
-							(pair1 @ pair2, eqs1 @ eqs2, ty :: tylist)
-				| [] -> ([], [], [])
-			in
-			let (pair, eqs, tylist) = read_tuple mlist in
-				(pair, eqs, TyTuple tylist)
-	| BinOp (Cons, l, r) ->
-			let (pair1, eqs1, ty1) = pattern_match varenv l in
-			let (pair2, eqs2, ty2) = pattern_match varenv r in
-				(pair1 @ pair2, (TyList ty1, ty2) :: eqs1 @ eqs2, ty2)
-	| ListExp mlist ->
-			let rec read_list = function
-					mexp' :: m_tl ->
-						let (pair1, eqs1, ty1) = pattern_match varenv mexp' in
-						let (pair2, eqs2, ty2) = read_list m_tl in
-							(pair1 @ pair2, (TyList ty1, ty2) :: eqs1 @ eqs2, ty2)
-				| [] ->	let alpha = fresh_tyvar () in ([], [], TyList alpha)
-			in read_list mlist
-	| ConstrExp (id, mexp') ->
-			let (varname, ty) = 
-				(try Environment.lookup id varenv
-     			with Environment.Not_bound -> err ("Constructor not bound: " ^ id)) in
-     	let (pair, eqs, ty') = pattern_match varenv mexp' in
-     		(pair, (ty, ty') :: eqs, TyVariant varname)
-	| Var id ->
-			let alpha = fresh_tyvar () in
-				([(id, alpha)], [], alpha)
-	| None -> 
-			([], [], TyNone)
-	| _ -> err ("Matching failed")
+let pattern_match varenv s mexp ty = 
+	let rec pattern_match varenv = function
+		  Var id ->
+				let alpha = fresh_tyvar () in
+					([(id, alpha)], [], alpha)
+		| ILit _ -> ([], [], TyInt)
+		| BLit _ -> ([], [], TyBool)
+		| BinOp (Cons, l, r) ->
+				let (pair1, eqs1, ty1) = pattern_match varenv l in
+				let (pair2, eqs2, ty2) = pattern_match varenv r in
+					(pair1 @ pair2, (TyList ty1, ty2) :: eqs1 @ eqs2, ty2)
+		| TupleExp mlist ->
+				let rec read_tuple = function
+						mexp' :: m_tl ->
+							let (pair1, eqs1, ty) = pattern_match varenv mexp' in
+							let (pair2, eqs2, tylist) = read_tuple m_tl in
+								(pair1 @ pair2, eqs1 @ eqs2, ty :: tylist)
+					| [] -> ([], [], [])
+				in
+				let (pair, eqs, tylist) = read_tuple mlist in
+					(pair, eqs, TyTuple tylist)
+		| ListExp mlist ->
+				let rec read_list = function
+						mexp' :: m_tl ->
+							let (pair1, eqs1, ty1) = pattern_match varenv mexp' in
+							let (pair2, eqs2, ty2) = read_list m_tl in
+								(pair1 @ pair2, (TyList ty1, ty2) :: eqs1 @ eqs2, ty2)
+					| [] ->	let alpha = fresh_tyvar () in ([], [], TyList alpha)
+				in read_list mlist
+		| ConstrExp (id, mexp') ->
+				let (varname, ty) = 
+					(try Environment.lookup id varenv
+		   			with Environment.Not_bound -> err ("Constructor not bound: " ^ id)) in
+		   	let (pair, eqs, ty') = pattern_match varenv mexp' in
+		   		(pair, (ty, ty') :: eqs, TyVariant varname)
+		| None -> 
+				([], [], TyNone)
+		| _ -> err ("Matching failed")
+	in
+	let (pair, eqs, mty) = pattern_match varenv mexp in
+	let s' = unify ((ty, mty) :: eqs @ (eqs_of_subst s)) in
+	let pair' = List.map (fun (x, y) -> (x, subst_type s' y)) pair in
+		(pair', s', subst_type s' mty)
 
-let rec pair_to_env tyenv first_env s = function
-		(id, ty) :: tl -> Environment.extend id (closure ty first_env s) (pair_to_env tyenv first_env s tl)
+let rec pair_to_env tyenv = function
+		(id, ty) :: tl -> Environment.extend id (tysc_of_ty ty) (pair_to_env tyenv tl)
+	| [] -> tyenv
+
+let rec pair_to_env_sc tyenv first_env s = function
+		(id, ty) :: tl -> Environment.extend id (closure ty first_env s) (pair_to_env_sc tyenv first_env s tl)
 	| [] -> tyenv
 
 let check_conflicts pair =
@@ -204,7 +216,7 @@ let rec eval_texp tylenv = function
 			(try Environment.lookup x tylenv
 			with Environment.Not_bound -> err ("Type not bound: " ^ x))		
 	| _ -> TyNone
-		
+	
 let rec ty_exp tyenv varenv = function
 		Var x -> 
       (try 
@@ -231,11 +243,8 @@ let rec ty_exp tyenv varenv = function
 				(match decl with
 						(mexp, exp) :: tl -> 
 							let (s, ty) = ty_exp first_env varenv exp in
-							let (pair, sub_eqs, mty) = pattern_match varenv mexp in
-							let eqs' = (ty, mty) :: sub_eqs @ (eqs_of_subst s) in
-							let s' = unify eqs' in
-							let pair' = List.map (fun (x, y) -> (x, subst_type s' y)) pair in
-								extend_env first_env ((eqs_of_subst s') @ eqs, pair_to_env tyenv first_env s' pair') tl
+							let (pair, s', mty) = pattern_match varenv s mexp ty in
+								extend_env first_env ((eqs_of_subst s') @ eqs, pair_to_env_sc tyenv first_env s' pair) tl
 					| [] -> (eqs, tyenv))
 			in
 				let (eqs, newenv) = extend_env tyenv ([], tyenv) decl in
@@ -254,13 +263,14 @@ let rec ty_exp tyenv varenv = function
 			in
 			let tyfuns, tyenv' = extend_env funcs in
 			let rec eval_eqs funcs tyfuns = match funcs, tyfuns with
-					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
+					(id, mexps, e) :: f_tl, tyfun :: tf_tl ->
 						(match tyfun with 
 								TyFun (arg_ty, body_ty) -> 
-									(match paras with 
-											para :: p_tl -> 
-												let (s, ty) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') varenv (FunExp (p_tl, e)) in
-													(ty, body_ty) :: (eqs_of_subst s) @ (eval_eqs f_tl tf_tl)
+									(match mexps with 
+											mexp :: m_tl -> 
+												let (pair, s, mty) = pattern_match varenv [] mexp arg_ty in
+												let (s', ty) = ty_exp (pair_to_env tyenv' pair) varenv (FunExp (m_tl, e)) in
+													(ty, body_ty) :: (eqs_of_subst s) @ (eqs_of_subst s') @ (eval_eqs f_tl tf_tl)
 										| [] -> assert false)
 							| _ -> assert false)
 				| [], [] -> []
@@ -269,7 +279,7 @@ let rec ty_exp tyenv varenv = function
 			let eqs =	eval_eqs funcs tyfuns in
 			let s = unify eqs in
 			let rec extend_env_sc funcs tyfuns = match funcs, tyfuns with
-					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
+					(id, _, _) :: f_tl, tyfun :: tf_tl ->
 						Environment.extend id (closure (subst_type s tyfun) tyenv s) (extend_env_sc f_tl tf_tl)						
 				| [], [] -> tyenv
 				| _, _ -> assert false
@@ -278,23 +288,23 @@ let rec ty_exp tyenv varenv = function
 			let (s2, ty2) = ty_exp newtyenv varenv exp in
 			let eqs' = (eqs_of_subst s2) @ (eqs_of_subst s) in
 			let s' = unify eqs' in (s', subst_type s' ty2)			
-	| FunExp (ids, exp) -> 
-			(match ids with
-					id :: tl ->
+	| FunExp (mexps, exp) -> 
+			(match mexps with
+					mexp :: m_tl ->
 						let arg_ty = fresh_tyvar () in
-						let (s, body_ty) = ty_exp (Environment.extend id (tysc_of_ty arg_ty) tyenv) varenv (FunExp (tl, exp)) in
-							(s, TyFun (subst_type s arg_ty, body_ty))
+						let (pair, s, mty) = pattern_match varenv [] mexp arg_ty in
+						let (s', body_ty) = ty_exp (pair_to_env tyenv pair) varenv (FunExp (m_tl, exp)) in
+						let eqs = (eqs_of_subst s) @ (eqs_of_subst s') in
+						let s'' = unify eqs in 
+							(s'', TyFun (subst_type s'' arg_ty, subst_type s'' body_ty))
 				| [] -> ty_exp tyenv varenv exp)
 	| MatchExp (exp, cases) ->
 			let alpha = fresh_tyvar () in
 			let rec match_case (s, ty) = function
 					(mexp, body) :: tl ->
-						let (pair, sub_eqs, mty) = pattern_match varenv mexp in
-						let eqs' = (ty, mty) :: sub_eqs @ (eqs_of_subst s) in
-						let s' = unify eqs' in
-						let pair' = List.map (fun (x, y) -> (x, subst_type s' y)) pair in
-						let (s_body, ty_body) = ty_exp (pair_to_env tyenv tyenv s' pair') varenv body in
-							(ty_body, alpha) :: (eqs_of_subst s_body) @ (match_case (s, ty) tl)
+						let (pair, s', mty) = pattern_match varenv s mexp ty in
+						let (s_body, ty_body) = ty_exp (pair_to_env tyenv pair) varenv body in
+							(ty_body, alpha) :: (eqs_of_subst s') @ (eqs_of_subst s_body) @ (match_case (s, ty) tl)
 				| [] -> []
 			in
 			let (s, ty) = ty_exp tyenv varenv exp in
@@ -348,12 +358,9 @@ let ty_decl tyenv varenv tylenv = function
 							(match decl with
 									(mexp, exp) :: tl -> 
 										let (s, ty) = ty_exp first_env varenv exp in
-										let (pair, sub_eqs, mty) = pattern_match varenv mexp in
-										let eqs = (ty, mty) :: sub_eqs @ (eqs_of_subst s) in
-										let s' = unify eqs in
-										let pair' = List.map (fun (x, y) -> (x, subst_type s' y)) pair in
-										let tys' = List.map (fun (x, y) -> y) pair' in
-											extend_env first_env (tys @ tys', pair_to_env tyenv first_env s' pair') tl
+										let (pair, s', mty) = pattern_match varenv s mexp ty in
+										let tys' = List.map (fun (x, y) -> y) pair in
+											extend_env first_env (tys @ tys', pair_to_env_sc tyenv first_env s' pair) tl
 								| [] -> (tys, tyenv))	
 						in
 							ty_line tl (extend_env tyenv (tys, tyenv) decl)
@@ -371,13 +378,14 @@ let ty_decl tyenv varenv tylenv = function
 			in
 			let tyfuns, tyenv' = extend_env funcs in
 			let rec eval_eqs funcs tyfuns = match funcs, tyfuns with
-					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
+					(id, mexps, e) :: f_tl, tyfun :: tf_tl ->
 						(match tyfun with 
 								TyFun (arg_ty, body_ty) ->
-									(match paras with 
-											para :: p_tl -> 
-												let (s, ty) = ty_exp (Environment.extend para (tysc_of_ty arg_ty) tyenv') varenv (FunExp (p_tl, e)) in
-													(ty, body_ty) :: (eqs_of_subst s) @ (eval_eqs f_tl tf_tl)
+									(match mexps with 
+											mexp :: m_tl -> 
+												let (pair, s, mty) = pattern_match varenv [] mexp arg_ty in
+												let (s', ty) = ty_exp (pair_to_env tyenv' pair) varenv (FunExp (m_tl, e)) in
+													(ty, body_ty) :: (eqs_of_subst s) @ (eqs_of_subst s') @ (eval_eqs f_tl tf_tl)
 										| [] -> assert false)
 							| _ -> assert false)
 				| [], [] -> []
@@ -386,7 +394,7 @@ let ty_decl tyenv varenv tylenv = function
 			let eqs =	eval_eqs funcs tyfuns in
 			let s = unify eqs in
 			let rec extend_env_sc funcs tyfuns = match funcs, tyfuns with
-					(id, paras, e) :: f_tl, tyfun :: tf_tl ->
+					(id, _, _) :: f_tl, tyfun :: tf_tl ->
 						let tys, newtyenv = extend_env_sc f_tl tf_tl in
 						let ty = subst_type s tyfun in
 							(ty :: tys, Environment.extend id (closure ty tyenv s) newtyenv)
@@ -395,16 +403,18 @@ let ty_decl tyenv varenv tylenv = function
 			in
 				extend_env_sc funcs tyfuns
 	| TypeDecl (id, texp) ->
-			let tylenv' = Environment.extend id (eval_texp tylenv texp) tylenv in
-				raise (TypeDeclare (id, varenv, tylenv'))
+			let ty = eval_texp tylenv texp in
+			let tylenv' = Environment.extend id ty tylenv in
+				raise (TypeDeclare ("type " ^ id ^ " = " ^ (string_of_ty ty), varenv, tylenv'))
 	| VariantDecl (id, variant) ->
 			let tylenv' = Environment.extend id (TyVariant id) tylenv in
 			let rec register_constr id firstenv = function
 					(constr, texp) :: tl -> 
 						let ty = eval_texp tylenv' texp in
-							Environment.extend constr (id, ty) (register_constr id firstenv tl)
-				| [] -> firstenv
+						let (s, varenv') = register_constr id firstenv tl in
+							(constr ^ (if ty = TyNone then "" else " of " ^ (string_of_ty ty)) ^ (if tl = [] then "" else " | ") ^ s, Environment.extend constr (id, ty) varenv')
+				| [] -> ("", firstenv)
 			in
-			let newvarenv = register_constr id varenv variant in
-				raise (TypeDeclare (id, newvarenv, tylenv'))
+			let (s, newvarenv) = register_constr id varenv variant in
+				raise (TypeDeclare ("type " ^ id ^ " = " ^ s, newvarenv, tylenv'))
 	| _ -> ([TyNone], tyenv)

@@ -18,12 +18,12 @@ type exp =
   | BinOp of binOp * exp * exp
   | IfExp of exp * exp * exp
   | LetExp of ((exp * exp) list) * exp
-  | FunExp of (id list) * exp
-  | DFunExp of (id list) * exp
+  | FunExp of (exp list) * exp
+  | DFunExp of (exp list) * exp
   | MatchExp of exp * ((exp * exp) list)
   | ListExp of exp list
   | AppExp of exp * exp
-  | LetRecExp of ((id * (id list) * exp) list) * exp
+  | LetRecExp of ((id * (exp list) * exp) list) * exp
   | ConstrExp of id * exp
   | TupleExp of exp list
 	| None
@@ -37,6 +37,6 @@ type texp =
 type program = 
     Exp of exp
   | Decl of ((exp * exp) list) list
-  | RecDecl of (id * (id list) * exp) list
+  | RecDecl of (id * (exp list) * exp) list
  	| TypeDecl of id * texp
  	| VariantDecl of id * ((id * texp) list)

@@ -9,8 +9,8 @@ open Util
 type exval =
     IntV of int
   | BoolV of bool
-  | ProcV of id * exp * dnval Environment.t ref
-  | DProcV of id * exp
+  | ProcV of exp * exp * dnval Environment.t ref
+  | DProcV of exp * exp
   | ListV of dnval list
   | VariantV of id * dnval
   | TupleV of dnval list
@@ -26,8 +26,8 @@ let err s = raise (Error s)
 let rec string_of_exval = function
     IntV i -> string_of_int i
   | BoolV b -> string_of_bool b
-  | ProcV (id, exp, env) -> "<fun>"
-  | DProcV (id, exp) -> "<dfun>"
+  | ProcV _ -> "<fun>"
+  | DProcV _ -> "<dfun>"
   | ListV lst ->
 			let rec string_of_list = function
 					hd :: md :: tl -> (string_of_exval hd) ^ "; " ^ (string_of_list (md :: tl))
@@ -62,18 +62,25 @@ let apply_prim op arg1 arg2 = match op, arg1, arg2 with
 
 let rec pattern_match mexp v = 
 	(match (mexp, v) with
-			TupleExp mlist, TupleV vlist ->
+		  Var id, _ -> [(id, v)]
+		| ILit i1, IntV i2 ->
+				if i1 = i2 then []
+				else raise MatchError
+		| BLit b1, BoolV b2 ->
+				if b1 = b2 then []
+				else raise MatchError 
+		| BinOp (Cons, l, r), ListV lst ->
+				(match lst with
+						hd :: tl -> 
+							(pattern_match l hd) @ (pattern_match r (ListV tl))
+					| [] -> raise MatchError)
+		| TupleExp mlist, TupleV vlist ->
 				let rec tuple_match = function
 						mexp' :: m_tl, v' :: v_tl ->
 							(pattern_match mexp' v') @ (tuple_match (m_tl, v_tl))
 					| [], [] -> []
 					| _ -> raise MatchError
 				in tuple_match (mlist, vlist)
-		| BinOp (Cons, l, r), ListV lst ->
-				(match lst with
-						hd :: tl -> 
-							(pattern_match l hd) @ (pattern_match r (ListV tl))
-					| [] -> raise MatchError)
 		| ListExp mlist, ListV lst ->
 				(match (mlist, lst) with
 						mexp' :: m_tl, hd :: tl ->
@@ -83,7 +90,6 @@ let rec pattern_match mexp v =
 		| ConstrExp (mid, mexp'), VariantV (id, v') ->
 				if mid = id then pattern_match mexp' v'
 				else raise MatchError
-		| Var id, _ -> [(id, v)]
 		| None, _ -> []
 		| _ -> raise MatchError)
 
@@ -125,12 +131,12 @@ let rec eval_exp env = function
 			let pair = List.map (fun (id, v, _) -> (id, v)) funcs in
 			check_conflicts pair;
 			let rec extend_env = function
-					(id, paras, e) :: f_tl ->
-				 		(match paras with
-				 				para :: p_tl -> 
+					(id, mexps, e) :: f_tl ->
+				 		(match mexps with
+				 				mexp :: m_tl -> 
 				 					let dummyenv = ref Environment.empty in
 				 					let dummyenvs, newenv = extend_env f_tl in
-				 					let v = ProcV (para, FunExp(p_tl, e), dummyenv) in
+				 					let v = ProcV (mexp, FunExp(m_tl, e), dummyenv) in
 					 					(dummyenv :: dummyenvs, Environment.extend id v newenv)
 							| [] -> err ("Function has no argument: " ^ id))
 				| [] -> ([], env)
@@ -142,13 +148,13 @@ let rec eval_exp env = function
 						insert_env rest
 				| [] -> ()
 			in insert_env dummyenvs; eval_exp newenv exp
-	| FunExp (ids, exp) -> 
-			(match ids with
-					id :: tl -> ProcV (id, FunExp (tl, exp), ref env)
+	| FunExp (mexps, exp) -> 
+			(match mexps with
+					mexp :: m_tl -> ProcV (mexp, FunExp (m_tl, exp), ref env)
 				| [] -> eval_exp env exp)
-	| DFunExp (ids, exp) ->
-			(match ids with
-					id :: tl -> DProcV (id, DFunExp (tl, exp))
+	| DFunExp (mexps, exp) ->
+			(match mexps with
+					mexp :: m_tl -> DProcV (mexp, DFunExp (m_tl, exp))
 				| [] -> eval_exp env exp)
 	| MatchExp (exp, cases) ->
 			let rec match_case v = function
@@ -182,12 +188,12 @@ let rec eval_exp env = function
 			let func = eval_exp env exp1 in
 			let arg = eval_exp env exp2 in 
 				(match func with
-						ProcV (id, body, env') ->
-							let newenv = Environment.extend id arg !env' in
-								eval_exp newenv body
-					| DProcV (id, body) ->
-							let newenv = Environment.extend id arg env in
-								eval_exp newenv body
+						ProcV (mexp, body, env') ->
+							let pair = pattern_match mexp arg in
+								eval_exp (pair_to_env !env' pair) body
+					| DProcV (mexp, body) ->
+							let pair = pattern_match mexp arg in
+								eval_exp (pair_to_env env pair) body
 					| _ -> err ("Non-Function value is applied"))
 
 (*							(match arg with
@@ -219,12 +225,12 @@ let eval_decl env = function
 			let pair = List.map (fun (id, v, _) -> (id, v)) funcs in
 			check_conflicts pair;
 			let rec extend_env = function
-					(id, paras, e) :: f_tl ->
-				 		(match paras with
-				 				para :: p_tl ->
+					(id, mexps, e) :: f_tl ->
+				 		(match mexps with
+				 				mexp :: m_tl ->
 				 					let dummyenv = ref Environment.empty in
 				 					let eqs, dummyenvs, newenv = extend_env f_tl in
-				 					let v = ProcV (para, FunExp(p_tl, e), dummyenv) in
+				 					let v = ProcV (mexp, FunExp(m_tl, e), dummyenv) in
 					 					((id, v) :: eqs, dummyenv :: dummyenvs, Environment.extend id v newenv)
 							| [] -> err ("Function has no argument: " ^ id))
 				| [] -> ([], [], env)
