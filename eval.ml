@@ -9,6 +9,7 @@ open Util
 type exval =
     IntV of int
   | BoolV of bool
+  | StringV of string
   | ProcV of exp * exp * dnval Environment.t ref
   | DProcV of exp * exp
   | ListV of dnval list
@@ -26,6 +27,7 @@ let err s = raise (Error s)
 let rec string_of_exval = function
     IntV i -> string_of_int i
   | BoolV b -> string_of_bool b
+  | StringV s -> "\"" ^ s ^ "\""
   | ProcV _ -> "<fun>"
   | DProcV _ -> "<dfun>"
   | ListV lst ->
@@ -58,6 +60,8 @@ let apply_prim op arg1 arg2 = match op, arg1, arg2 with
   | And, BoolV b1, BoolV b2 -> BoolV (b1 && b2)
   | Or, BoolV b1, BoolV b2 -> BoolV (b1 || b2)
   | Cons, l, ListV r -> ListV (l :: r)
+  | Join, StringV s1, StringV s2 -> StringV (s1 ^ s2)
+  | Append, ListV l, ListV r -> ListV (l @ r)
   | _ -> err ("Invalid expression: binOp")
 
 let rec pattern_match mexp v = 
@@ -68,7 +72,10 @@ let rec pattern_match mexp v =
 				else raise MatchError
 		| BLit b1, BoolV b2 ->
 				if b1 = b2 then []
-				else raise MatchError 
+				else raise MatchError
+		| SLit s1, StringV s2 ->
+				if s1 = s2 then []
+				else raise MatchError
 		| BinOp (Cons, l, r), ListV lst ->
 				(match lst with
 						hd :: tl -> 
@@ -108,6 +115,7 @@ let rec eval_exp env = function
         Environment.Not_bound -> err ("Variable not bound: " ^ x))
   | ILit i -> IntV i
   | BLit b -> BoolV b
+  | SLit s -> StringV s
   | BinOp (op, exp1, exp2) -> 
       let arg1 = eval_exp env exp1 in
       let arg2 = eval_exp env exp2 in

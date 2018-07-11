@@ -1,11 +1,11 @@
 (* ML interpreter / type reconstruction *)
 type id = string
 
-type binOp = Plus | Minus | Mult | Eq | Lt | Gt | And | Or | Cons
+type binOp = Plus | Minus | Mult | Eq | Lt | Gt | And | Or | Cons | Join | Append
 
 type tyvar = int
 
-type ty = TyInt | TyBool | TyVar of tyvar | TyFun of ty * ty | TyList of ty | TyVariant of string | TyTuple of ty list | TyNone
+type ty = TyInt | TyBool | TyVar of tyvar | TyFun of ty * ty | TyList of ty | TyVariant of string | TyTuple of ty list | TyString | TyNone
 
 type tysc = TyScheme of tyvar list * ty
 
@@ -15,6 +15,7 @@ type exp =
     Var of id
   | ILit of int
   | BLit of bool
+  | SLit of string
   | BinOp of binOp * exp * exp
   | IfExp of exp * exp * exp
   | LetExp of ((exp * exp) list) * exp

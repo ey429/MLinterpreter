@@ -26,6 +26,7 @@ let string_of_ty ty =
 	let rec string_of_ty free = function
 			TyInt -> ("int", free)
 		| TyBool -> ("bool", free)
+		| TyString -> ("string", free)
 		| TyVar i ->
 				let free' = 
 					if MySet.member i free then free
@@ -69,14 +70,11 @@ let pp_ty ty =
 type subst = (tyvar * ty) list
 
 let rec replace (s_tyvar, s_ty) = function
-		TyInt -> TyInt
-	| TyBool -> TyBool
-	| TyVar tyvar -> if tyvar == s_tyvar then s_ty else TyVar tyvar
+	  TyVar tyvar -> if tyvar == s_tyvar then s_ty else TyVar tyvar
 	| TyFun (ty1, ty2) -> TyFun (replace (s_tyvar, s_ty) ty1, replace (s_tyvar, s_ty) ty2)
 	| TyList ty -> TyList (replace (s_tyvar, s_ty) ty)
-	| TyVariant s -> TyVariant s
 	| TyTuple tys -> TyTuple (List.map (replace (s_tyvar, s_ty)) tys)
-	| _ -> TyNone
+	| ty -> ty
 
 let rec subst_type subst ty1 = 
 	(match subst with
@@ -149,6 +147,10 @@ let ty_prim op ty1 ty2 = match op with
   | And -> ([(ty1, TyBool); (ty2, TyBool)], TyBool)
   | Or -> ([(ty1, TyBool); (ty2, TyBool)], TyBool)
   | Cons -> ([(TyList ty1, ty2)], TyList ty1)
+  | Join -> ([(ty1, TyString); (ty2, TyString)], TyString)
+  | Append ->
+  		let alpha = fresh_tyvar () in
+  			([(ty1, TyList alpha); (ty2, TyList alpha)], TyList alpha)
 
 let pattern_match varenv s mexp ty = 
 	let rec pattern_match varenv = function
@@ -157,6 +159,7 @@ let pattern_match varenv s mexp ty =
 					([(id, alpha)], [], alpha)
 		| ILit _ -> ([], [], TyInt)
 		| BLit _ -> ([], [], TyBool)
+		| SLit _ -> ([], [], TyString)
 		| BinOp (Cons, l, r) ->
 				let (pair1, eqs1, ty1) = pattern_match varenv l in
 				let (pair2, eqs2, ty2) = pattern_match varenv r in
@@ -226,6 +229,7 @@ let rec ty_exp tyenv varenv = function
       with Environment.Not_bound -> err ("Variable not bound: " ^ x))
   | ILit _ -> ([], TyInt)
   | BLit _ -> ([], TyBool)
+  | SLit _ -> ([], TyString)
   | BinOp (op, exp1, exp2) -> 
       let (s1, ty1) = ty_exp tyenv varenv exp1 in
       let (s2, ty2) = ty_exp tyenv varenv exp2 in
@@ -271,7 +275,7 @@ let rec ty_exp tyenv varenv = function
 												let (pair, s, mty) = pattern_match varenv [] mexp arg_ty in
 												let (s', ty) = ty_exp (pair_to_env tyenv' pair) varenv (FunExp (m_tl, e)) in
 													(ty, body_ty) :: (eqs_of_subst s) @ (eqs_of_subst s') @ (eval_eqs f_tl tf_tl)
-										| [] -> assert false)
+										| [] -> [])
 							| _ -> assert false)
 				| [], [] -> []
 				| _, _ -> assert false
@@ -386,7 +390,7 @@ let ty_decl tyenv varenv tylenv = function
 												let (pair, s, mty) = pattern_match varenv [] mexp arg_ty in
 												let (s', ty) = ty_exp (pair_to_env tyenv' pair) varenv (FunExp (m_tl, e)) in
 													(ty, body_ty) :: (eqs_of_subst s) @ (eqs_of_subst s') @ (eval_eqs f_tl tf_tl)
-										| [] -> assert false)
+										| [] -> [])
 							| _ -> assert false)
 				| [], [] -> []
 				| _, _ -> assert false

@@ -8,6 +8,7 @@ type token =
   | TYPE
   | TRUE
   | THEN
+  | STRING of (string)
   | SEMISEMI
   | SEMI
   | RSQPAREN
@@ -25,11 +26,13 @@ type token =
   | LPAREN
   | LIST
   | LET
+  | JOIN
   | INTV of (int)
   | IN
   | IF
   | ID of (Syntax.id)
   | GT
+  | FUNCTION
   | FUN
   | FALSE
   | EQ
@@ -38,6 +41,7 @@ type token =
   | CONSTR of (Syntax.id)
   | CONS
   | COMMA
+  | APPEND
   | AND
   | AAND
 

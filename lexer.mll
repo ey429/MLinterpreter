@@ -17,6 +17,7 @@ let reservedWords = [
   ("type", Parser.TYPE);
   ("of", Parser.OF);
   ("list", Parser.LIST);
+  ("function", Parser.FUNCTION);
 ]
 }	
 
@@ -48,6 +49,8 @@ rule main = parse
 | "|" { Parser.VERT }
 | "," { Parser.COMMA }
 | "_" { Parser.UNDERBAR }
+| "^" { Parser.JOIN }
+| "@" { Parser.APPEND }
 
 | ['a'-'z'] ['a'-'z' '0'-'9' '_' '\'']*
     { let id = Lexing.lexeme lexbuf in
@@ -55,14 +58,19 @@ rule main = parse
         List.assoc id reservedWords
       with
       _ -> Parser.ID id
-     }
+    }
 | ['A'-'Z'] ['a'-'z' '0'-'9' '_' '\'']*
     { let id = Lexing.lexeme lexbuf in
       try 
         List.assoc id reservedWords
       with
       _ -> Parser.CONSTR id
-     }
+    }
+| '\"' [^'\"']* '\"'
+		{	let s = (Lexing.lexeme lexbuf) in
+			let n = String.length s in
+				Parser.STRING (String.sub (String.sub s 0 (n - 1)) 1 (n - 2))
+		}
 | eof { exit 0 }
 
 and comment = parse

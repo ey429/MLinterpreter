@@ -14,10 +14,14 @@ open Syntax
 %token COMMA
 %token LIST
 %token UNDERBAR
+%token FUNCTION
+%token JOIN
+%token APPEND
 
 %token <int> INTV
 %token <Syntax.id> ID
 %token <Syntax.id> CONSTR
+%token <string> STRING
 
 %start toplevel
 %type <Syntax.program> toplevel
@@ -43,6 +47,7 @@ Expr :
   
 FunExpr :
 		FUN p=MulID RARROW e=Expr { FunExp (p, e) }
+	| FUNCTION l=CaseExpr { FunExp([(Var "match")], MatchExp (Var "match", l)) }
 	| DFUN p=MulID RARROW e=Expr { DFunExp (p, e) }
 	
 MulID :
@@ -84,7 +89,7 @@ RecDeclExpr :
 
 UnitRecDeclExpr :
 		f=ID p=MulID EQ e=Expr { (f, p, e) }
-	| f=ID EQ FUN p=MulID RARROW e=Expr { (f, p, e) }
+	| f=ID EQ e=Expr { (f, [], e) }
 
 DeclExpr :
 		u=UnitDeclExpr AND d=DeclExpr { u :: d }
@@ -102,9 +107,17 @@ CaseExpr :
 	| m=ArgMatchExpr RARROW e=Expr { [(m, e)] }
 
 ConsExpr :
-		l=ORExpr CONS r=ConsExpr { BinOp (Cons, l, r) }
-	| e=ORExpr { e }
+		l=AppendExpr CONS r=ConsExpr { BinOp (Cons, l, r) }
+	| e=AppendExpr { e }
 
+AppendExpr :
+		l=JoinExpr APPEND r=AppendExpr { BinOp(Append, l, r) }
+	| e=JoinExpr { e }
+	
+JoinExpr :
+		l=ORExpr JOIN r=JoinExpr { BinOp (Join, l, r) }
+	| e=ORExpr { e }
+	
 ORExpr :
 		l=ORExpr OOR r=ANDExpr { BinOp (Or, l, r) }
 	| e=ANDExpr { e }
@@ -143,6 +156,7 @@ AExpr :
   | TRUE   { BLit true }
   | FALSE  { BLit false }
   | i=ID   { Var i }
+  | s=STRING { SLit s }
   | LPAREN e=Expr RPAREN { e }
   | LSQPAREN e=ListExpr RSQPAREN { ListExp e }
   | x=CONSTR e=Expr { ConstrExp (x, e) }
