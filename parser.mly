@@ -89,7 +89,9 @@ RecDeclExpr :
 
 UnitRecDeclExpr :
 		f=ID p=MulID EQ e=Expr { (f, p, e) }
-	| f=ID EQ e=Expr { (f, [], e) }
+	| f=ID EQ FUN p=MulID RARROW e=Expr { (f, p, e) }
+	| f=ID p=MulID EQ FUNCTION l=CaseExpr { (f, (Var "match") :: p, MatchExp (Var "match", l)) }
+	| f=ID EQ FUNCTION l=CaseExpr { (f, [Var "match"], MatchExp (Var "match", l)) }
 
 DeclExpr :
 		u=UnitDeclExpr AND d=DeclExpr { u :: d }

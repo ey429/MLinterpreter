@@ -1,5 +1,5 @@
 
-** Conflict (reduce/reduce) in state 159.
+** Conflict (reduce/reduce) in state 166.
 ** Token involved: RSQPAREN
 ** This state is reached from toplevel after reading:
 
@@ -23,20 +23,20 @@ AExpr
 LSQPAREN ListExpr RSQPAREN // lookahead token appears
          (?)
 
-** In state 159, looking ahead at RSQPAREN, reducing production
+** In state 166, looking ahead at RSQPAREN, reducing production
 ** ListExpr -> Expr SEMI 
 ** is permitted because of the following sub-derivation:
 
 Expr SEMI . 
 
-** In state 159, looking ahead at RSQPAREN, reducing production
+** In state 166, looking ahead at RSQPAREN, reducing production
 ** ListExpr -> 
 ** is permitted because of the following sub-derivation:
 
 Expr SEMI ListExpr // lookahead token is inherited
           . 
 
-** Conflict (shift/reduce) in state 151.
+** Conflict (shift/reduce) in state 158.
 ** Token involved: RPAREN
 ** This state is reached from toplevel after reading:
 
@@ -59,19 +59,48 @@ AppExpr
 AExpr 
 (?)
 
-** In state 151, looking ahead at RPAREN, shifting is permitted
+** In state 158, looking ahead at RPAREN, shifting is permitted
 ** because of the following sub-derivation:
 
 LPAREN Expr . RPAREN 
 
-** In state 151, looking ahead at RPAREN, reducing production
+** In state 158, looking ahead at RPAREN, reducing production
 ** TupleExpr -> Expr 
 ** is permitted because of the following sub-derivation:
 
 LPAREN TupleExpr RPAREN // lookahead token appears
        Expr . 
 
-** Conflict (shift/reduce) in state 118.
+** Conflict (reduce/reduce) in state 135.
+** Tokens involved: SEMISEMI IN AND
+** The following explanations concentrate on token SEMISEMI.
+** This state is reached from toplevel after reading:
+
+LET REC ID MulID EQ FUNCTION CaseExpr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+toplevel 
+LET REC RecDeclExpr SEMISEMI // lookahead token appears
+        UnitRecDeclExpr // lookahead token is inherited
+        (?)
+
+** In state 135, looking ahead at SEMISEMI, reducing production
+** FunExpr -> FUNCTION CaseExpr 
+** is permitted because of the following sub-derivation:
+
+ID MulID EQ Expr // lookahead token is inherited
+            FunExpr // lookahead token is inherited
+            FUNCTION CaseExpr . 
+
+** In state 135, looking ahead at SEMISEMI, reducing production
+** UnitRecDeclExpr -> ID MulID EQ FUNCTION CaseExpr 
+** is permitted because of the following sub-derivation:
+
+ID MulID EQ FUNCTION CaseExpr . 
+
+** Conflict (shift/reduce) in state 125.
 ** Token involved: VERT
 ** This state is reached from toplevel after reading:
 
@@ -86,7 +115,7 @@ FunExpr
 FUNCTION CaseExpr 
          (?)
 
-** In state 118, looking ahead at VERT, shifting is permitted
+** In state 125, looking ahead at VERT, shifting is permitted
 ** because of the following sub-derivation:
 
 ArgMatchExpr RARROW Expr VERT CaseExpr 
@@ -94,7 +123,7 @@ ArgMatchExpr RARROW Expr VERT CaseExpr
                     FUNCTION CaseExpr 
                              ArgMatchExpr RARROW Expr . VERT CaseExpr 
 
-** In state 118, looking ahead at VERT, reducing production
+** In state 125, looking ahead at VERT, reducing production
 ** CaseExpr -> ArgMatchExpr RARROW Expr 
 ** is permitted because of the following sub-derivation:
 
@@ -103,7 +132,7 @@ ArgMatchExpr RARROW Expr VERT CaseExpr // lookahead token appears
                     FUNCTION CaseExpr // lookahead token is inherited
                              ArgMatchExpr RARROW Expr . 
 
-** Conflict (shift/reduce) in state 111.
+** Conflict (shift/reduce) in state 113.
 ** Token involved: CONS
 ** This state is reached from toplevel after reading:
 
@@ -117,7 +146,7 @@ Expr SEMISEMI
 ConsExpr 
 (?)
 
-** In state 111, looking ahead at CONS, shifting is permitted
+** In state 113, looking ahead at CONS, shifting is permitted
 ** because of the following sub-derivation:
 
 AppendExpr CONS ConsExpr 
@@ -133,7 +162,7 @@ CONSTR Expr
        ConsExpr 
        AppendExpr . CONS ConsExpr 
 
-** In state 111, looking ahead at CONS, reducing production
+** In state 113, looking ahead at CONS, reducing production
 ** ConsExpr -> AppendExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -152,7 +181,7 @@ CONSTR Expr // lookahead token is inherited
        ConsExpr // lookahead token is inherited
        AppendExpr . 
 
-** Conflict (shift/reduce) in state 104.
+** Conflict (shift/reduce) in state 106.
 ** Token involved: APPEND
 ** This state is reached from toplevel after reading:
 
@@ -167,7 +196,7 @@ ConsExpr
 AppendExpr CONS ConsExpr 
 (?)
 
-** In state 104, looking ahead at APPEND, shifting is permitted
+** In state 106, looking ahead at APPEND, shifting is permitted
 ** because of the following sub-derivation:
 
 JoinExpr APPEND AppendExpr 
@@ -183,7 +212,7 @@ CONSTR Expr
        AppendExpr CONS ConsExpr 
        JoinExpr . APPEND AppendExpr 
 
-** In state 104, looking ahead at APPEND, reducing production
+** In state 106, looking ahead at APPEND, reducing production
 ** AppendExpr -> JoinExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -202,7 +231,7 @@ CONSTR Expr // lookahead token is inherited
        AppendExpr // lookahead token is inherited
        JoinExpr . 
 
-** Conflict (shift/reduce) in state 101.
+** Conflict (shift/reduce) in state 103.
 ** Token involved: AAND
 ** This state is reached from toplevel after reading:
 
@@ -220,7 +249,7 @@ ORExpr JOIN JoinExpr
 ANDExpr 
 (?)
 
-** In state 101, looking ahead at AAND, shifting is permitted
+** In state 103, looking ahead at AAND, shifting is permitted
 ** because of the following sub-derivation:
 
 EQExpr 
@@ -236,7 +265,7 @@ CONSTR Expr
        ANDExpr 
        ANDExpr . AAND LTExpr 
 
-** In state 101, looking ahead at AAND, reducing production
+** In state 103, looking ahead at AAND, reducing production
 ** ORExpr -> ANDExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -255,7 +284,7 @@ CONSTR Expr // lookahead token is inherited
        ORExpr // lookahead token is inherited
        ANDExpr . 
 
-** Conflict (shift/reduce) in state 97.
+** Conflict (shift/reduce) in state 99.
 ** Tokens involved: PLUS MINUS LT GT
 ** The following explanations concentrate on token PLUS.
 ** This state is reached from toplevel after reading:
@@ -276,7 +305,7 @@ EQExpr
 PExpr EQ PExpr 
 (?)
 
-** In state 97, looking ahead at PLUS, reducing production
+** In state 99, looking ahead at PLUS, reducing production
 ** GTExpr -> PExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -294,7 +323,7 @@ CONSTR Expr // lookahead token is inherited
                     GTExpr // lookahead token is inherited
                     PExpr . 
 
-** In state 97, looking ahead at PLUS, shifting is permitted
+** In state 99, looking ahead at PLUS, shifting is permitted
 ** because of the following sub-derivation:
 
 MExpr 
@@ -310,7 +339,7 @@ CONSTR Expr
                     PExpr LT PExpr 
                     PExpr . PLUS MExpr 
 
-** Conflict (shift/reduce) in state 95.
+** Conflict (shift/reduce) in state 97.
 ** Token involved: AAND
 ** This state is reached from toplevel after reading:
 
@@ -328,7 +357,7 @@ ORExpr JOIN JoinExpr
 ANDExpr 
 (?)
 
-** In state 95, looking ahead at AAND, shifting is permitted
+** In state 97, looking ahead at AAND, shifting is permitted
 ** because of the following sub-derivation:
 
 EQExpr 
@@ -344,7 +373,7 @@ CONSTR Expr
        ORExpr OOR ANDExpr 
                   ANDExpr . AAND LTExpr 
 
-** In state 95, looking ahead at AAND, reducing production
+** In state 97, looking ahead at AAND, reducing production
 ** ORExpr -> ORExpr OOR ANDExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -363,7 +392,7 @@ CONSTR Expr // lookahead token is inherited
        ORExpr // lookahead token is inherited
        ORExpr OOR ANDExpr . 
 
-** Conflict (shift/reduce) in state 90.
+** Conflict (shift/reduce) in state 92.
 ** Tokens involved: OOR JOIN
 ** The following explanations concentrate on token OOR.
 ** This state is reached from toplevel after reading:
@@ -381,7 +410,7 @@ JoinExpr APPEND AppendExpr
 ORExpr JOIN JoinExpr 
 (?)
 
-** In state 90, looking ahead at OOR, reducing production
+** In state 92, looking ahead at OOR, reducing production
 ** JoinExpr -> ORExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -400,7 +429,7 @@ CONSTR Expr // lookahead token is inherited
        JoinExpr // lookahead token is inherited
        ORExpr . 
 
-** In state 90, looking ahead at OOR, shifting is permitted
+** In state 92, looking ahead at OOR, shifting is permitted
 ** because of the following sub-derivation:
 
 ANDExpr 
@@ -416,7 +445,7 @@ CONSTR Expr
        ORExpr JOIN JoinExpr 
        ORExpr . OOR ANDExpr 
 
-** Conflict (shift/reduce) in state 89.
+** Conflict (shift/reduce) in state 91.
 ** Tokens involved: PLUS MINUS
 ** The following explanations concentrate on token PLUS.
 ** This state is reached from toplevel after reading:
@@ -437,7 +466,7 @@ EQExpr
 PExpr EQ PExpr 
 (?)
 
-** In state 89, looking ahead at PLUS, reducing production
+** In state 91, looking ahead at PLUS, reducing production
 ** EQExpr -> PExpr EQ PExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -454,7 +483,7 @@ CONSTR Expr // lookahead token is inherited
        EQExpr // lookahead token is inherited
        PExpr EQ PExpr . 
 
-** In state 89, looking ahead at PLUS, shifting is permitted
+** In state 91, looking ahead at PLUS, shifting is permitted
 ** because of the following sub-derivation:
 
 MExpr 
@@ -470,7 +499,7 @@ CONSTR Expr
        PExpr EQ PExpr 
                 PExpr . PLUS MExpr 
 
-** Conflict (shift/reduce) in state 87.
+** Conflict (shift/reduce) in state 89.
 ** Tokens involved: PLUS MINUS
 ** The following explanations concentrate on token PLUS.
 ** This state is reached from toplevel after reading:
@@ -491,7 +520,7 @@ EQExpr
 PExpr EQ PExpr 
 (?)
 
-** In state 87, looking ahead at PLUS, reducing production
+** In state 89, looking ahead at PLUS, reducing production
 ** GTExpr -> PExpr GT PExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -510,7 +539,7 @@ CONSTR Expr // lookahead token is inherited
        GTExpr // lookahead token is inherited
        PExpr GT PExpr . 
 
-** In state 87, looking ahead at PLUS, shifting is permitted
+** In state 89, looking ahead at PLUS, shifting is permitted
 ** because of the following sub-derivation:
 
 MExpr 
@@ -528,7 +557,7 @@ CONSTR Expr
        PExpr GT PExpr 
                 PExpr . PLUS MExpr 
 
-** Conflict (shift/reduce) in state 85.
+** Conflict (shift/reduce) in state 87.
 ** Token involved: MULT
 ** This state is reached from toplevel after reading:
 
@@ -549,7 +578,7 @@ PExpr EQ PExpr
 MExpr 
 (?)
 
-** In state 85, looking ahead at MULT, shifting is permitted
+** In state 87, looking ahead at MULT, shifting is permitted
 ** because of the following sub-derivation:
 
 AppExpr 
@@ -565,7 +594,7 @@ CONSTR Expr
        MExpr 
        MExpr . MULT AppExpr 
 
-** In state 85, looking ahead at MULT, reducing production
+** In state 87, looking ahead at MULT, reducing production
 ** PExpr -> MExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -584,7 +613,7 @@ CONSTR Expr // lookahead token is inherited
        PExpr // lookahead token is inherited
        MExpr . 
 
-** Conflict (shift/reduce) in state 84.
+** Conflict (shift/reduce) in state 86.
 ** Tokens involved: PLUS MINUS
 ** The following explanations concentrate on token PLUS.
 ** This state is reached from toplevel after reading:
@@ -605,7 +634,7 @@ EQExpr
 PExpr EQ PExpr 
 (?)
 
-** In state 84, looking ahead at PLUS, reducing production
+** In state 86, looking ahead at PLUS, reducing production
 ** LTExpr -> PExpr LT PExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -623,7 +652,7 @@ CONSTR Expr // lookahead token is inherited
        LTExpr // lookahead token is inherited
        PExpr LT PExpr . 
 
-** In state 84, looking ahead at PLUS, shifting is permitted
+** In state 86, looking ahead at PLUS, shifting is permitted
 ** because of the following sub-derivation:
 
 MExpr 
@@ -640,7 +669,7 @@ CONSTR Expr
        PExpr LT PExpr 
                 PExpr . PLUS MExpr 
 
-** Conflict (shift/reduce) in state 82.
+** Conflict (shift/reduce) in state 84.
 ** Token involved: MULT
 ** This state is reached from toplevel after reading:
 
@@ -661,7 +690,7 @@ PExpr EQ PExpr
 MExpr 
 (?)
 
-** In state 82, looking ahead at MULT, shifting is permitted
+** In state 84, looking ahead at MULT, shifting is permitted
 ** because of the following sub-derivation:
 
 AppExpr 
@@ -677,7 +706,7 @@ CONSTR Expr
        PExpr MINUS MExpr 
                    MExpr . MULT AppExpr 
 
-** In state 82, looking ahead at MULT, reducing production
+** In state 84, looking ahead at MULT, reducing production
 ** PExpr -> PExpr MINUS MExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -696,7 +725,7 @@ CONSTR Expr // lookahead token is inherited
        PExpr // lookahead token is inherited
        PExpr MINUS MExpr . 
 
-** Conflict (shift/reduce) in state 80.
+** Conflict (shift/reduce) in state 82.
 ** Tokens involved: TRUE STRING LSQPAREN LPAREN INTV ID FALSE CONSTR
 ** The following explanations concentrate on token TRUE.
 ** This state is reached from toplevel after reading:
@@ -719,7 +748,7 @@ MExpr
 AppExpr 
 (?)
 
-** In state 80, looking ahead at TRUE, shifting is permitted
+** In state 82, looking ahead at TRUE, shifting is permitted
 ** because of the following sub-derivation:
 
 AExpr 
@@ -736,7 +765,7 @@ CONSTR Expr
        AppExpr AExpr 
                . TRUE 
 
-** In state 80, looking ahead at TRUE, reducing production
+** In state 82, looking ahead at TRUE, reducing production
 ** MExpr -> AppExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -755,7 +784,7 @@ CONSTR Expr // lookahead token is inherited
        MExpr // lookahead token is inherited
        AppExpr . 
 
-** Conflict (shift/reduce) in state 77.
+** Conflict (shift/reduce) in state 79.
 ** Tokens involved: TRUE STRING LSQPAREN LPAREN INTV ID FALSE CONSTR
 ** The following explanations concentrate on token TRUE.
 ** This state is reached from toplevel after reading:
@@ -778,7 +807,7 @@ MExpr
 AppExpr 
 (?)
 
-** In state 77, looking ahead at TRUE, shifting is permitted
+** In state 79, looking ahead at TRUE, shifting is permitted
 ** because of the following sub-derivation:
 
 AExpr 
@@ -795,7 +824,7 @@ CONSTR Expr
                   AppExpr AExpr 
                           . TRUE 
 
-** In state 77, looking ahead at TRUE, reducing production
+** In state 79, looking ahead at TRUE, reducing production
 ** MExpr -> MExpr MULT AppExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -814,7 +843,7 @@ CONSTR Expr // lookahead token is inherited
        MExpr // lookahead token is inherited
        MExpr MULT AppExpr . 
 
-** Conflict (shift/reduce) in state 75.
+** Conflict (shift/reduce) in state 77.
 ** Token involved: MULT
 ** This state is reached from toplevel after reading:
 
@@ -835,7 +864,7 @@ PExpr EQ PExpr
 MExpr 
 (?)
 
-** In state 75, looking ahead at MULT, shifting is permitted
+** In state 77, looking ahead at MULT, shifting is permitted
 ** because of the following sub-derivation:
 
 AppExpr 
@@ -851,7 +880,7 @@ CONSTR Expr
        PExpr PLUS MExpr 
                   MExpr . MULT AppExpr 
 
-** In state 75, looking ahead at MULT, reducing production
+** In state 77, looking ahead at MULT, reducing production
 ** PExpr -> PExpr PLUS MExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -870,7 +899,7 @@ CONSTR Expr // lookahead token is inherited
        PExpr // lookahead token is inherited
        PExpr PLUS MExpr . 
 
-** Conflict (shift/reduce) in state 73.
+** Conflict (shift/reduce) in state 75.
 ** Tokens involved: PLUS MINUS LT GT EQ
 ** The following explanations concentrate on token PLUS.
 ** This state is reached from toplevel after reading:
@@ -891,7 +920,7 @@ EQExpr
 PExpr EQ PExpr 
 (?)
 
-** In state 73, looking ahead at PLUS, reducing production
+** In state 75, looking ahead at PLUS, reducing production
 ** GTExpr -> PExpr 
 ** is permitted because of the following sub-derivation:
 
@@ -910,7 +939,7 @@ CONSTR Expr // lookahead token is inherited
        GTExpr // lookahead token is inherited
        PExpr . 
 
-** In state 73, looking ahead at PLUS, shifting is permitted
+** In state 75, looking ahead at PLUS, shifting is permitted
 ** because of the following sub-derivation:
 
 MExpr 
@@ -926,7 +955,7 @@ CONSTR Expr
        PExpr EQ PExpr 
        PExpr . PLUS MExpr 
 
-** Conflict (shift/reduce) in state 72.
+** Conflict (shift/reduce) in state 74.
 ** Tokens involved: TRUE STRING LSQPAREN LPAREN LET INTV ID FALSE CONSTR
 ** The following explanations concentrate on token TRUE.
 ** This state is reached from toplevel after reading:
@@ -949,7 +978,7 @@ MExpr
 AppExpr 
 (?)
 
-** In state 72, looking ahead at TRUE, shifting is permitted
+** In state 74, looking ahead at TRUE, shifting is permitted
 ** because of the following sub-derivation:
 
 AExpr 
@@ -966,7 +995,7 @@ CONSTR Expr
        AExpr 
        . TRUE 
 
-** In state 72, looking ahead at TRUE, reducing production
+** In state 74, looking ahead at TRUE, reducing production
 ** AExpr -> CONSTR 
 ** is permitted because of the following sub-derivation:
 

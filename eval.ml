@@ -141,12 +141,12 @@ let rec eval_exp env = function
 			let rec extend_env = function
 					(id, mexps, e) :: f_tl ->
 				 		(match mexps with
-				 				mexp :: m_tl -> 
+				 				mexp :: m_tl ->
 				 					let dummyenv = ref Environment.empty in
 				 					let dummyenvs, newenv = extend_env f_tl in
 				 					let v = ProcV (mexp, FunExp(m_tl, e), dummyenv) in
 					 					(dummyenv :: dummyenvs, Environment.extend id v newenv)
-							| [] -> err ("Function has no argument: " ^ id))
+							| [] -> ([], env))
 				| [] -> ([], env)
 			in
 			let dummyenvs, newenv = extend_env funcs in
