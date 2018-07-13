@@ -57,7 +57,8 @@ let initial_varenv = Environment.empty
 let initial_tylenv =
 	Environment.extend "" TyNone
 		(Environment.extend "int" TyInt
-			(Environment.extend "bool" TyBool Environment.empty))
+			(Environment.extend "bool" TyBool 
+				(Environment.extend "string" TyString Environment.empty)))
 
 let _ = read_eval_print initial_env initial_tyenv initial_varenv initial_tylenv
 

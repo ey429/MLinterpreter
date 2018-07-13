@@ -307,6 +307,7 @@ let rec ty_exp tyenv varenv = function
 			let rec match_case (s, ty) = function
 					(mexp, body) :: tl ->
 						let (pair, s', mty) = pattern_match varenv s mexp ty in
+						check_conflicts pair;
 						let (s_body, ty_body) = ty_exp (pair_to_env tyenv pair) varenv body in
 							(ty_body, alpha) :: (eqs_of_subst s') @ (eqs_of_subst s_body) @ (match_case (s, ty) tl)
 				| [] -> []
